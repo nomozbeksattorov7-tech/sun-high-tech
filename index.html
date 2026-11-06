@@ -88,8 +88,29 @@ tfoot td { font-weight:750; border-bottom:0; }
 .tbl { overflow-x:auto; }
 .warn { background:var(--mid-bg); color:var(--mid); border-radius:12px; padding:10px 14px; font-size:14px; margin-bottom:18px; }
 .foot { color:var(--muted); font-size:13px; margin:0; }
+
+/* Voronka: har bir etap — markazlangan to'g'ri burchakli ustun, eni shu etapga yetgan lidlar soniga mos */
+.fn { display:flex; flex-direction:column; gap:6px; margin-top:6px; }
+.fr { display:grid; grid-template-columns:200px minmax(0,1fr) 190px; gap:18px; align-items:center; }
+.fr .nm { font-size:14.5px; font-weight:650; color:#2b3850; }
+.fr .nm small { display:block; font-weight:500; color:var(--muted); font-size:12.5px; }
+.fr .tr { position:relative; height:38px; display:flex; justify-content:center; }
+.fr .bx { height:100%; min-width:46px; border-radius:8px; display:grid; place-items:center; color:#fff; font-weight:750;
+  font-size:15px; font-variant-numeric:tabular-nums; transition:width .6s ease; }
+.fr .st { font-variant-numeric:tabular-nums; font-size:13.5px; color:var(--muted); line-height:1.35; }
+.fr .st b { color:var(--fg); font-size:15px; }
+.fr .st .ls { color:var(--low); font-weight:600; }
+.fc { display:grid; grid-template-columns:200px minmax(0,1fr) 190px; gap:18px; }
+.fc span { grid-column:2; justify-self:center; font-size:12.5px; font-weight:650; color:var(--ifg); background:var(--ibg);
+  padding:2px 10px; border-radius:999px; font-variant-numeric:tabular-nums; }
+.fsum { display:flex; flex-wrap:wrap; gap:10px 28px; justify-content:space-between; margin-top:20px; padding-top:16px;
+  border-top:1px solid var(--line); color:var(--muted); font-size:15px; }
+.fsum b { color:var(--blue); font-variant-numeric:tabular-nums; } .fsum b.r { color:var(--low); }
 @media (max-width: 1150px) { .hero { grid-template-columns:repeat(2, minmax(0,1fr)); } .mgrid { grid-template-columns:repeat(2, minmax(0,1fr)); }
   .m:nth-child(4n) { border-right:1px solid var(--line); } .m:nth-child(2n) { border-right:0; } .grid2 { grid-template-columns:1fr; } }
+@media (max-width: 800px) { .fr, .fc { grid-template-columns:minmax(0,1fr) auto; gap:4px 12px; }
+  .fr .tr { grid-column:1 / -1; grid-row:2; justify-content:flex-start; height:30px; } .fr .st { text-align:right; }
+  .fc span { grid-column:1 / -1; justify-self:start; } }
 @media (max-width: 600px) { .page { padding:18px 14px 30px; } .hero, .mgrid { grid-template-columns:1fr; } .m { border-right:0 !important; }
   h1 { font-size:30px; } .hc .v { font-size:30px; } .panel { padding:20px 18px; } .pnote { margin-left:0; } }
 </style>
@@ -118,6 +139,13 @@ tfoot td { font-weight:750; border-bottom:0; }
     <div class="ph"><div class="ib" data-i="chart"></div><h2>Umumiy ko'rsatkichlar</h2></div>
     <p class="pnote">Foiz = ko'rsatkich ÷ yangi lidlar × 100. Qo'ng'iroqlar menejerning barcha qo'ng'iroqlari (teg filtri faqat lidlarga), shuning uchun 100% dan oshishi mumkin.</p>
     <div class="mgrid" id="mgrid"></div>
+  </section>
+
+  <section class="panel">
+    <div class="ph"><div class="ib" data-i="funnel"></div><h2>Sotuv voronkasi</h2></div>
+    <p class="pnote" id="fnnote">Shu davrda kelgan lidlar: har bir etapga nechtasi yetib kelgan (hozir shu yoki keyingi etapda). Yopilgan — shu etapda yopilgan (lost) lidlar.</p>
+    <div class="fn" id="fn"></div>
+    <div class="fsum" id="fsum"></div>
   </section>
 
   <div class="grid2">
@@ -241,6 +269,26 @@ function render(raw) {
     return x;
   }));
   $('revsum').textContent = k.revenueKnown ? som(k.revenue) : '—';
+
+  // Voronka: ko'kning ochdan to'qqa o'tuvchi tuslari
+  const F = d.funnel || [], top = F.length ? F[0].reached : 0, shade = (i) => `hsl(213, 78%, ${68 - i / Math.max(1, F.length - 1) * 30}%)`;
+  const fn = [];
+  F.forEach((s, i) => {
+    if (i) { const c = el('div', 'fc'); c.append(el('span', '', '↓ ' + share(s.reached, F[i - 1].reached))); fn.push(c); }
+    const r = el('div', 'fr'), nm = el('div', 'nm', s.name);
+    nm.append(el('small', '', s.now ? `hozir shu etapda: ${num(s.now)}` : ''));
+    const tr = el('div', 'tr'), bx = el('div', 'bx', num(s.reached));
+    bx.style.width = (top ? Math.max(s.reached / top * 100, 0) : 0) + '%'; bx.style.background = s.reached ? shade(i) : '#cbd5e1';
+    tr.append(bx);
+    const st = el('div', 'st'); st.append(el('b', '', share(s.reached, top)), ' jamidan');
+    if (s.lost) { st.append(el('br')); st.append(el('span', 'ls', `yopilgan: ${num(s.lost)}`)); }
+    r.append(nm, tr, st); fn.push(r);
+  });
+  $('fn').replaceChildren(...fn);
+  const lostAll = F.reduce((a, s) => a + s.lost, 0), last = F.length ? F[F.length - 1].reached : 0;
+  const fs = el('div'); fs.append(`${F.length ? F[0].name : ''} → ${F.length ? F[F.length - 1].name : ''}: `, el('b', '', share(last, top)));
+  const fl = el('div'); fl.append('Yopilgan (lost) lidlar: ', el('b', 'r', `${num(lostAll)} ta`), ` · ${share(lostAll, top)}`);
+  $('fsum').replaceChildren(fs, fl);
 
   const rows = d.managers.slice().sort((a, b) => b.sec - a.sec);
   const cells = (m) => [m.name, num(m.leads), num(m.out), num(m.talked), hms(m.sec), num(m.full)];
