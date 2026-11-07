@@ -100,6 +100,8 @@ tfoot td { font-weight:750; border-bottom:0; }
 .fr .st { font-variant-numeric:tabular-nums; font-size:13.5px; color:var(--muted); line-height:1.35; }
 .fr .st b { color:var(--fg); font-size:15px; }
 .fr .st .ls { color:var(--low); font-weight:600; }
+.fr.rf { margin-top:14px; padding-top:14px; border-top:1px dashed var(--line); }
+.fr.rf .st .rs { color:var(--low); font-weight:650; }
 .fc { display:grid; grid-template-columns:200px minmax(0,1fr) 190px; gap:18px; }
 .fc span { grid-column:2; justify-self:center; font-size:12.5px; font-weight:650; color:var(--ifg); background:var(--ibg);
   padding:2px 10px; border-radius:999px; font-variant-numeric:tabular-nums; }
@@ -182,6 +184,7 @@ const ICONS = {
   x: '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/>',
   pct: '<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
   timer: '<path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/>',
+  refund: '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>',
   funnel: '<path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>',
   chart: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 17v-5M12 17V7M16 17v-3"/>',
 };
@@ -246,7 +249,7 @@ function render(raw) {
       grade(talkRate, 45, 30, true, ["Yaxshi — mijozlar ko'taryapti", "Me'yorda", "Past — ko'p qo'ng'iroq javobsiz"])],
     ['timer', "O'rtacha suhbat", k.talked ? hms(avg) : '—', null,
       k.talked ? grade(avg / 60, 4, 2, true, ["Yaxshi — chuqur suhbat", "Me'yorda", "Qisqa — taqdimot yetmayapti"]) : null],
-    ['funnel', 'Konversiya', share(k.full, k.newLeads), "To'liq to'lov / yangi lid"],
+    ['refund', 'Vozvrat qilindi', num(k.refund || 0) + ' ta', som(k.refundSum || 0) + ' qaytarilgan'],
     ['users', 'Jami lidlar (patok)', num(k.totalLeads), `${PATOK} dan beri · BotReg / BotDeposit`],
   ];
   $('mgrid').replaceChildren(...metrics.map(([ic, t, v, n, tag]) => {
@@ -271,17 +274,26 @@ function render(raw) {
   $('revsum').textContent = k.revenueKnown ? som(k.revenue) : '—';
 
   // Voronka: ko'kning ochdan to'qqa o'tuvchi tuslari
-  const F = d.funnel || [], top = F.length ? F[0].reached : 0, shade = (i) => `hsl(213, 78%, ${68 - i / Math.max(1, F.length - 1) * 30}%)`;
+  const FA = d.funnel || [], F = FA.filter((s) => !s.refund), RF = FA.filter((s) => s.refund), top = F.length ? F[0].reached : 0, shade = (i) => `hsl(213, 78%, ${68 - i / Math.max(1, F.length - 1) * 30}%)`;
   const fn = [];
   F.forEach((s, i) => {
     if (i) { const c = el('div', 'fc'); c.append(el('span', '', '↓ ' + share(s.reached, F[i - 1].reached))); fn.push(c); }
     const r = el('div', 'fr'), nm = el('div', 'nm', s.name);
-    nm.append(el('small', '', s.now ? `hozir shu etapda: ${num(s.now)}` : ''));
+    nm.append(el('small', '', s.now ? `hozir shu etapda: ${num(s.now)}` + (s.sum ? ` · ${som(s.sum)}` : '') : ''));
     const tr = el('div', 'tr'), bx = el('div', 'bx', num(s.reached));
     bx.style.width = (top ? Math.max(s.reached / top * 100, 0) : 0) + '%'; bx.style.background = s.reached ? shade(i) : '#cbd5e1';
     tr.append(bx);
     const st = el('div', 'st'); st.append(el('b', '', share(s.reached, top)), ' jamidan');
     if (s.lost) { st.append(el('br')); st.append(el('span', 'ls', `yopilgan: ${num(s.lost)}`)); }
+    r.append(nm, tr, st); fn.push(r);
+  });
+  RF.forEach((s) => {
+    const r = el('div', 'fr rf'), nm = el('div', 'nm', s.name);
+    nm.append(el('small', '', "shu davrda vozvrat qilinganlar"));
+    const tr = el('div', 'tr'), bx = el('div', 'bx', num(s.reached));
+    bx.style.width = (top ? Math.max(s.reached / top * 100, 0) : 0) + '%'; bx.style.background = s.reached ? '#dc2626' : '#cbd5e1';
+    tr.append(bx);
+    const st = el('div', 'st'); st.append(el('b', '', `${num(s.reached)} ta`), el('br'), el('span', 'rs', som(s.sum || 0)));
     r.append(nm, tr, st); fn.push(r);
   });
   $('fn').replaceChildren(...fn);
