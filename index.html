@@ -145,7 +145,7 @@ tfoot td { font-weight:750; border-bottom:0; }
 
   <section class="panel">
     <div class="ph"><div class="ib" data-i="funnel"></div><h2>Sotuv voronkasi</h2></div>
-    <p class="pnote" id="fnnote">Shu davrda kelgan lidlar: har bir etapga nechtasi yetib kelgan (hozir shu yoki keyingi etapda). Yopilgan — shu etapda yopilgan (lost) lidlar.</p>
+    <p class="pnote" id="fnnote">Shu davrda kelgan lidlar: har bir etapga nechtasi yetib kelgan (hozir shu yoki keyingi etapda). To'lov etaplariga shu davrda o'tkazilgan oldingi kunlardagi lidlar ham qo'shiladi. Yopilgan — shu etapda yopilgan (lost) lidlar.</p>
     <div class="fn" id="fn"></div>
     <div class="fsum" id="fsum"></div>
   </section>
@@ -277,7 +277,7 @@ function render(raw) {
   const FA = d.funnel || [], F = FA.filter((s) => !s.refund), RF = FA.filter((s) => s.refund), top = F.length ? F[0].reached : 0, shade = (i) => `hsl(213, 78%, ${68 - i / Math.max(1, F.length - 1) * 30}%)`;
   const fn = [];
   F.forEach((s, i) => {
-    if (i) { const c = el('div', 'fc'); c.append(el('span', '', '↓ ' + share(s.reached, F[i - 1].reached))); fn.push(c); }
+    if (i) { const c = el('div', 'fc'); c.append(el('span', '', s.reached > F[i - 1].reached ? `+${num(s.reached - F[i - 1].reached)} oldingi kunlardan` : '↓ ' + share(s.reached, F[i - 1].reached))); fn.push(c); }
     const r = el('div', 'fr'), nm = el('div', 'nm', s.name);
     nm.append(el('small', '', s.now ? `hozir shu etapda: ${num(s.now)}` + (s.sum ? ` · ${som(s.sum)}` : '') : ''));
     const tr = el('div', 'tr'), bx = el('div', 'bx', num(s.reached));
