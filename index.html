@@ -45,6 +45,9 @@ h1 { margin:0; font-size:38px; font-weight:800; letter-spacing:-.02em; }
 .hc .t { font-size:17px; font-weight:600; opacity:.95; }
 .hc .v { font-size:36px; font-weight:800; letter-spacing:-.01em; font-variant-numeric:tabular-nums; line-height:1.15; }
 .hc .v small { font-size:16px; font-weight:600; opacity:.85; margin-left:6px; }
+.hc .tl { position:relative; z-index:1; margin-top:12px; display:grid; gap:3px; font-size:13.5px; font-weight:650; font-variant-numeric:tabular-nums; }
+.hc .tl div { display:flex; justify-content:space-between; gap:10px; border-top:1px solid rgba(255,255,255,.2); padding-top:3px; }
+.hc .tl span { opacity:.85; font-weight:500; }
 .hc .n { position:relative; z-index:1; margin-top:22px; font-size:14.5px; font-weight:600; opacity:.92; }
 
 /* Oq panel */
@@ -230,13 +233,21 @@ function render(raw) {
   const hero = [
     ['wallet', 'Jami tushum', k.revenueKnown ? num(k.revenue) : '—', "so'm", !k.revenueKnown ? "Bu davr uchun tushum tarixi hali yo'q" : k.revenueApprox ? `Taxminiy · shu davrda yangilangan lidlar bo'yicha` : `Menejerlar + avtoto'lov · ${d.label.toLowerCase()}`],
     ['users', 'Yangi lidlar', num(k.newLeads), 'ta', d.period === 'all' ? 'BotReg / BotDeposit teglari bor lidlar' : `Patok bo'yicha jami: ${num(k.totalLeads)} ta lid`],
-    ['check', "To'liq to'lovlar", num(k.full), 'ta', `Konversiya: ${share(k.full, k.newLeads)} yangi lidlardan`],
-    ['clock', 'Calltime', hms(k.sec), '', `${num(k.talked)} ta suhbat · soat:daqiqa:soniya`],
+    ['check', "To'liq to'lov", num(d.pay ? d.pay.full.n : k.full), 'ta', `Konversiya: ${share(k.full, k.newLeads)} yangi lidlardan`, d.pay && d.pay.full],
+    ['pct', "Qisman to'lov", d.pay ? num(d.pay.part.n) : '—', 'ta', '', d.pay && d.pay.part],
   ];
-  $('hero').replaceChildren(...hero.map(([ic, t, v, u, n]) => {
+  $('hero').replaceChildren(...hero.map(([ic, t, v, u, n, p]) => {
     const c = el('div', 'hc'), h = el('div', 'head'), ico = el('div', 'ico'); ico.innerHTML = svg(ic);
     const box = el('div'); box.append(el('div', 't', t)); const vv = el('div', 'v', v); if (u) vv.append(el('small', '', u)); box.append(vv);
-    h.append(ico, box); c.append(h, el('div', 'n', n)); return c;
+    h.append(ico, box); c.append(h);
+    if (p) {   // tariflar kesimida: nomi | soni · summasi
+      const tl = el('div', 'tl');
+      p.rows.filter((r) => r.n || r.name !== 'Belgilanmagan').forEach((r) => {
+        const x = el('div'); x.append(el('span', '', r.name === 'STANDART +' ? 'Standart+' : r.name.charAt(0) + r.name.slice(1).toLowerCase()), `${num(r.n)} ta · ${num(r.sum)}`); tl.append(x);
+      });
+      c.append(tl);
+    } else c.append(el('div', 'n', n));
+    return c;
   }));
 
   const talkRate = ratio(k.talked, k.out), avg = k.talked ? k.sec / k.talked : 0;
@@ -250,7 +261,7 @@ function render(raw) {
     ['timer', "O'rtacha suhbat", k.talked ? hms(avg) : '—', null,
       k.talked ? grade(avg / 60, 4, 2, true, ["Yaxshi — chuqur suhbat", "Me'yorda", "Qisqa — taqdimot yetmayapti"]) : null],
     ['refund', 'Vozvrat qilindi', num(k.refund || 0) + ' ta', som(k.refundSum || 0) + ' qaytarilgan'],
-    ['users', 'Jami lidlar (patok)', num(k.totalLeads), `${PATOK} dan beri · BotReg / BotDeposit`],
+    ['clock', 'Calltime', hms(k.sec), `${num(k.talked)} ta suhbat · soat:daqiqa:soniya`],
   ];
   $('mgrid').replaceChildren(...metrics.map(([ic, t, v, n, tag]) => {
     const m = el('div', 'm'), h = el('div', 'mh'), ib = el('div', 'ib'); ib.innerHTML = svg(ic);
