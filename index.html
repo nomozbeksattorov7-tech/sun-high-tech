@@ -105,6 +105,25 @@ tfoot td { font-weight:750; border-bottom:0; }
 .fr .st .ls { color:var(--low); font-weight:600; }
 .fr.rf { margin-top:14px; padding-top:14px; border-top:1px dashed var(--line); }
 .fr.rf .st .rs { color:var(--low); font-weight:650; }
+.rg { display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:24px; align-items:center; }
+#rgmap { width:100%; height:auto; display:block; }
+#rgmap path { stroke:#fff; stroke-width:1; cursor:pointer; transition:fill .3s; }
+#rgmap path:hover, #rgmap path.on { stroke:#0b2a55; stroke-width:2; }
+.rgside { display:grid; gap:12px; }
+.rgfill, .rginfo { border:1px solid var(--line); border-radius:14px; padding:12px 14px; font-size:14px; color:var(--muted); }
+.rgfill b, .rginfo b { color:var(--fg); }
+.rginfo .big { font-size:28px; font-weight:800; color:#185FA5; }
+.rgbar { height:7px; border-radius:4px; background:var(--line); margin-top:8px; overflow:hidden; } .rgbar i { display:block; height:100%; background:#378ADD; }
+.rgleg { display:flex; gap:4px; align-items:center; font-size:12px; color:var(--muted); } .rgleg span { width:24px; height:9px; border-radius:2px; }
+.rgh { margin:22px 0 8px; font-size:16px; }
+.pp { display:flex; gap:6px; justify-content:flex-end; } .rginfo .pp { justify-content:flex-start; margin-top:8px; }
+.pp span { font-size:12.5px; font-weight:650; padding:2px 8px; border-radius:7px; white-space:nowrap; }
+.pp .qp { background:#FAEEDA; color:#854F0B; } .pp .tp { background:#EAF3DE; color:#27500A; } .pp .z { opacity:.45; }
+.rr { display:grid; grid-template-columns:150px minmax(0,1fr) 70px 190px; gap:14px; align-items:center; padding:6px 0; font-size:14.5px; border-top:1px solid var(--line); }
+.rr .tr { height:12px; border-radius:6px; background:var(--line); overflow:hidden; } .rr .tr i { display:block; height:100%; background:#378ADD; border-radius:6px; }
+.rr .v { text-align:right; font-variant-numeric:tabular-nums; } .rr .v em { font-style:normal; color:#3B6D11; font-weight:650; }
+.rr.none { color:var(--muted); } .rr.none .tr i { background:#cbd5e1; }
+@media (max-width: 800px) { .rg { grid-template-columns:minmax(0,1fr); } .rr { grid-template-columns:110px minmax(0,1fr) 60px; gap:6px 8px; font-size:13.5px; } .rr .pp { grid-column:1 / -1; justify-content:flex-start; } }
 .fc { display:grid; grid-template-columns:200px minmax(0,1fr) 190px; gap:18px; }
 .fc span { grid-column:2; justify-self:center; font-size:12.5px; font-weight:650; color:var(--ifg); background:var(--ibg);
   padding:2px 10px; border-radius:999px; font-variant-numeric:tabular-nums; }
@@ -153,6 +172,17 @@ tfoot td { font-weight:750; border-bottom:0; }
     <div class="fsum" id="fsum"></div>
   </section>
 
+  <section class="panel">
+    <div class="ph"><div class="ib" data-i="map"></div><h2>Mijozlar hududi</h2></div>
+    <p class="pnote" id="rgnote">Shu davrda kelgan lidlar Odoo'dagi "Регион" maydoni bo'yicha. 12 ta etapdagi lidlar (yopilganlar ham). Rang — lidlar soni; alohida: hozir QISMAN TO'LOV va TO'LIQ TO'LOV etapidagilar; yashil nuqta — ikkalasi jami.</p>
+    <div class="rg">
+      <svg id="rgmap" viewBox="0 0 520 330"></svg>
+      <div class="rgside"><div class="rgfill" id="rgfill"></div><div class="rginfo" id="rginfo">Viloyat ustiga olib boring</div><div class="rgleg" id="rgleg"></div></div>
+    </div>
+    <h3 class="rgh">Hududlar reytingi</h3>
+    <div id="rgrank"></div>
+  </section>
+
   <div class="grid2">
     <section class="panel">
       <div class="ph"><div class="ib" data-i="wallet"></div><h2>Xodimlar tushumi</h2></div>
@@ -175,6 +205,7 @@ tfoot td { font-weight:750; border-bottom:0; }
     Avtoto'lov (bot) menejerlar KPI'siga kirmaydi. Sahifa har 30 soniyada o'zi yangilanadi.</p>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script>
 const ICONS = {
   wallet: '<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a1 1 0 0 1 1 1v3"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-3"/><path d="M17 12h4v4h-4a2 2 0 0 1 0-4z"/>',
@@ -188,6 +219,7 @@ const ICONS = {
   pct: '<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
   timer: '<path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/>',
   refund: '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>',
+  map: '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/>',
   funnel: '<path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>',
   chart: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 17v-5M12 17V7M16 17v-3"/>',
 };
@@ -312,6 +344,7 @@ function render(raw) {
   const fs = el('div'); fs.append(`${F.length ? F[0].name : ''} → ${F.length ? F[F.length - 1].name : ''}: `, el('b', '', share(last, top)));
   const fl = el('div'); fl.append('Yopilgan (lost) lidlar: ', el('b', 'r', `${num(lostAll)} ta`), ` · ${share(lostAll, top)}`);
   $('fsum').replaceChildren(fs, fl);
+  renderRegions(d.regions);
 
   const rows = d.managers.slice().sort((a, b) => b.sec - a.sec);
   const cells = (m) => [m.name, num(m.leads), num(m.out), num(m.talked), hms(m.sec), num(m.full)];
@@ -319,6 +352,69 @@ function render(raw) {
   const tot = rows.reduce((a, m) => ({ name: 'Jami', leads: a.leads + m.leads, out: a.out + m.out, talked: a.talked + m.talked, sec: a.sec + m.sec, full: a.full + m.full }),
     { leads: 0, out: 0, talked: 0, sec: 0, full: 0 });
   const ft = el('tr'); cells(tot).forEach((c) => ft.append(el('td', '', c))); $('tfoot').replaceChildren(ft);
+}
+
+// Mijozlar hududi: O'zbekiston xaritasi (viloyat chegaralari Natural Earth/Highcharts, bir marta yuklanadi) + reyting
+const RG_KEY = {'toshkent shahri': 'TC', 'toshkent viloyati': 'TV', 'andijon': 'uz-an', 'samarqand': 'uz-sa', 'fargona': 'uz-fa',
+  'namangan': 'uz-ng', 'qashqadaryo': 'uz-qa', 'jizzax': 'uz-ji', 'surxondaryo': 'uz-su', 'sirdaryo': 'uz-si', 'buxoro': 'uz-bu',
+  'nukus': 'uz-qr', 'qoraqalpogiston': 'uz-qr', 'navoiy': 'uz-nw', 'xorazm': 'uz-kh'};
+const RG_NAME = {'TC': 'Toshkent sh.', 'TV': 'Toshkent vil.', 'uz-an': 'Andijon', 'uz-sa': 'Samarqand', 'uz-fa': "Farg'ona", 'uz-ng': 'Namangan',
+  'uz-qa': 'Qashqadaryo', 'uz-ji': 'Jizzax', 'uz-su': 'Surxondaryo', 'uz-si': 'Sirdaryo', 'uz-bu': 'Buxoro', 'uz-qr': "Qoraqalpog'iston",
+  'uz-nw': 'Navoiy', 'uz-kh': 'Xorazm'};
+const RG_RAMP = ['#E6F1FB', '#B5D4F4', '#85B7EB', '#378ADD', '#185FA5', '#0C447C'];
+let rgGeo = null, rgData = null;
+const rgNorm = (s) => s.toLowerCase().replace(/[\u2018\u2019'`ʻʼ]/g, '').trim();
+function renderRegions(R) {
+  if (!R) return;
+  const by = {};
+  R.rows.forEach((r) => { const k = RG_KEY[rgNorm(r.name)] || r.name; const x = by[k] || (by[k] = {key: k, name: RG_NAME[k] || r.name, n: 0, part: 0, full: 0, paid: 0}); x.n += r.n; x.part += r.part || 0; x.full += r.full || 0; x.paid = x.part + x.full; });
+  Object.keys(RG_NAME).forEach((k) => { if (!by[k]) by[k] = {key: k, name: RG_NAME[k], n: 0, part: 0, full: 0, paid: 0}; });
+  const rows = Object.values(by).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name)), max = Math.max(1, ...rows.map((r) => r.n));
+  rgData = {by, max};
+  const known = R.total - R.none, f = $('rgfill');
+  f.replaceChildren(); f.append('Manzil kiritilgan: ', el('b', '', `${num(known)} / ${num(R.total)}`), ` (${share(known, R.total)})`);
+  const bar = el('div', 'rgbar'), bi = el('i'); bi.style.width = (R.total ? known / R.total * 100 : 0) + '%'; bar.append(bi); f.append(bar);
+  const lg = $('rgleg'); lg.replaceChildren('kam', ...RG_RAMP.map((c) => { const s = el('span'); s.style.background = c; return s; }), "ko'p");
+  $('rgrank').replaceChildren(...rows.filter((r) => r.n).map((r) => rgRow(r.name, r.n, r, max, false)), rgRow('Manzili kiritilmagan', R.none, null, Math.max(max, R.none), true));
+  if (!rows.some((r) => r.n)) $('rgrank').prepend(el('div', 'pnote', "Bu davrda hududi kiritilgan lid yo'q"));
+  if (rgGeo) rgPaint(); else if (!rgGeo && window.d3) rgLoad();
+}
+function rgRow(name, n, p, max, none) {
+  const r = el('div', none ? 'rr none' : 'rr'), tr = el('div', 'tr'), i = el('i'); i.style.width = (n / max * 100) + '%'; tr.append(i);
+  const v = el('div', 'v', `${num(n)} lid`), pp = el('div', 'pp');
+  if (p) { pp.append(el('span', 'qp' + (p.part ? '' : ' z'), `qisman ${num(p.part)}`), el('span', 'tp' + (p.full ? '' : ' z'), `to'liq ${num(p.full)}`)); }
+  r.append(el('div', '', name), tr, v, pp); return r;
+}
+function rgColor(n) { if (!n) return '#e5e7eb'; return RG_RAMP[Math.min(RG_RAMP.length - 1, Math.floor(n / rgData.max * (RG_RAMP.length - 0.01)))]; }
+function rgLoad() {
+  rgGeo = 'loading';
+  fetch('https://cdn.jsdelivr.net/npm/@highcharts/map-collection@2.3.0/countries/uz/uz-all.geo.json').then((x) => x.json()).then((g) => {
+    const pr = d3.geoIdentity().reflectY(true).fitSize([520, 330], g), path = d3.geoPath(pr);
+    const t = g.features.filter((f) => ['uz-tk', 'uz-ta'].includes(f.properties['hc-key'])).sort((a, b) => path.area(a) - path.area(b));
+    t[0].properties.k = 'TC'; t[1].properties.k = 'TV';
+    g.features.forEach((f) => { if (!f.properties.k) f.properties.k = f.properties['hc-key']; });
+    rgGeo = {g, path}; rgPaint();
+  }).catch(() => { rgGeo = null; $('rginfo').textContent = 'Xarita yuklanmadi'; });
+}
+function rgInfo(k) {
+  const r = rgData.by[k] || {name: RG_NAME[k], n: 0, part: 0, full: 0}, b = $('rginfo'), pp = el('div', 'pp');
+  pp.append(el('span', 'qp' + (r.part ? '' : ' z'), `qisman ${num(r.part)}`), el('span', 'tp' + (r.full ? '' : ' z'), `to'liq ${num(r.full)}`));
+  b.replaceChildren(el('b', '', r.name), el('div', 'big', num(r.n)), 'lid', pp);
+}
+function rgPaint() {
+  if (!rgGeo || rgGeo === 'loading' || !rgData) return;
+  const svg = d3.select('#rgmap'), {g, path} = rgGeo;
+  svg.selectAll('path').data(g.features).join('path').attr('d', path).attr('fill', (f) => rgColor((rgData.by[f.properties.k] || {}).n || 0))
+    .on('mouseenter', function (e, f) { d3.select(this).classed('on', true).raise(); rgInfo(f.properties.k); })
+    .on('mouseleave', function () { d3.select(this).classed('on', false); });
+  svg.selectAll('g.lb').remove();
+  const lb = svg.append('g').attr('class', 'lb').attr('pointer-events', 'none');
+  g.features.forEach((f) => {
+    const r = rgData.by[f.properties.k] || {n: 0, paid: 0}, c = path.centroid(f), big = path.area(f) > 900;
+    if (big && r.n) lb.append('text').attr('x', c[0]).attr('y', c[1] + 4).attr('text-anchor', 'middle').attr('font-size', 13).attr('font-weight', 700)
+      .attr('fill', r.n / rgData.max > 0.5 ? '#fff' : '#0C447C').text(r.n);
+    if (r.paid) lb.append('circle').attr('cx', c[0] + (big ? 14 : 0)).attr('cy', c[1] - (big ? 12 : 0)).attr('r', 3 + Math.min(6, r.paid)).attr('fill', '#639922').attr('stroke', '#fff');
+  });
 }
 
 function fail(e) {
