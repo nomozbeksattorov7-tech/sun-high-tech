@@ -1,453 +1,175 @@
 <!doctype html>
 <html lang="uz">
 <head>
-<base target="_top">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sun High-Tech — Sotuv dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GetGreen sotuv paneli</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-:root { --bg:#f1f4f9; --panel:#ffffff; --fg:#111a2b; --muted:#5b6b82; --line:#e4e9f1; --track:#edf1f7;
-  --blue:#1f7ae0; --ibg:#e9f1fd; --ifg:#2f6fd0; --ok-bg:#e6f6ec; --ok:#1d7a45; --mid-bg:#fdf3e1; --mid:#9a6200;
-  --low-bg:#fde9e7; --low:#b4362b; --dark:#152238; }
-* { box-sizing:border-box; }
-body { margin:0; background:var(--bg); color:var(--fg);
-  font:15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-.page { max-width:1320px; margin:0 auto; padding:28px 24px 40px; display:flex; flex-direction:column; gap:22px; }
-header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
-h1 { margin:0; font-size:38px; font-weight:800; letter-spacing:-.02em; }
-.sub { margin:6px 0 0; color:var(--muted); font-size:17px; }
-.live { display:inline-flex; align-items:center; gap:9px; padding:12px 18px; border:1px solid var(--line); border-radius:14px;
-  background:var(--panel); font-weight:600; font-size:15px; }
-.live i { width:9px; height:9px; border-radius:50%; background:#22a06b; animation:pulse 2s infinite; }
-.live.err i { background:var(--low); animation:none; }
-@keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(34,160,107,.5); } 70% { box-shadow:0 0 0 9px rgba(34,160,107,0); } 100% { box-shadow:0 0 0 0 rgba(34,160,107,0); } }
-
-.tabs { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-.tabs button { font:inherit; font-weight:650; font-size:15px; padding:10px 20px; border-radius:12px; border:1px solid var(--line);
-  background:var(--panel); color:#33415a; cursor:pointer; }
-.tabs button.on { background:var(--dark); color:#fff; border-color:var(--dark); }
-.tabs input[type=date] { font:inherit; font-size:15px; padding:9px 14px; border:1px solid var(--line); border-radius:12px; color:var(--fg); background:var(--panel); }
-.tabs .sep { width:1px; height:28px; background:var(--line); margin:0 4px; }
-
-/* Asosiy ko'k kartochkalar */
-.hero { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:22px; }
-.hc { position:relative; overflow:hidden; border-radius:22px; padding:24px 26px; color:#fff; min-height:178px;
-  background:linear-gradient(135deg, #1565c8 0%, #2a8ef0 100%); box-shadow:0 14px 30px -14px rgba(28,110,215,.55); }
-.hc:nth-child(2) { background:linear-gradient(135deg, #1679e6 0%, #3aa0f5 100%); }
-.hc:nth-child(3) { background:linear-gradient(135deg, #2a7fe0 0%, #57a9f2 100%); }
-.hc:nth-child(4) { background:linear-gradient(135deg, #0f5cb8 0%, #3b8de8 100%); }
-.hc::before { content:""; position:absolute; width:150px; height:150px; border-radius:50%; right:-30px; top:-55px; background:rgba(255,255,255,.12); }
-.hc::after { content:""; position:absolute; left:-10%; right:-10%; bottom:-48px; height:110px; border-radius:50% 50% 0 0;
-  background:rgba(255,255,255,.08); }
-.hc .head { position:relative; z-index:1; display:flex; gap:16px; align-items:center; }
-.hc .ico { flex:none; width:58px; height:58px; border-radius:50%; background:rgba(255,255,255,.18); display:grid; place-items:center; }
-.hc .ico svg { width:28px; height:28px; }
-.hc .t { font-size:17px; font-weight:600; opacity:.95; }
-.hc .v { font-size:36px; font-weight:800; letter-spacing:-.01em; font-variant-numeric:tabular-nums; line-height:1.15; }
-.hc .v small { font-size:16px; font-weight:600; opacity:.85; margin-left:6px; }
-.hc .tl { position:relative; z-index:1; margin-top:12px; display:grid; gap:3px; font-size:13.5px; font-weight:650; font-variant-numeric:tabular-nums; }
-.hc .tl div { display:flex; justify-content:space-between; gap:10px; border-top:1px solid rgba(255,255,255,.2); padding-top:3px; }
-.hc .tl span { opacity:.85; font-weight:500; }
-.hc .n { position:relative; z-index:1; margin-top:22px; font-size:14.5px; font-weight:600; opacity:.92; }
-
-/* Oq panel */
-.panel { background:var(--panel); border:1px solid var(--line); border-radius:22px; padding:26px 30px; }
-.ph { display:flex; align-items:center; gap:14px; margin-bottom:8px; }
-.ph .ib { width:46px; height:46px; border-radius:12px; background:var(--ibg); color:var(--ifg); display:grid; place-items:center; }
-.ph .ib svg { width:24px; height:24px; }
-h2 { margin:0; font-size:24px; font-weight:750; }
-.pnote { margin:0 0 18px 60px; color:var(--muted); font-size:14px; }
-.mgrid { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); }
-.m { padding:22px 26px; border-bottom:1px solid var(--line); border-right:1px solid var(--line); }
-.m:nth-child(4n) { border-right:0; }
-.m .mh { display:flex; align-items:center; gap:14px; }
-.m .ib { width:46px; height:46px; border-radius:12px; background:var(--ibg); color:var(--ifg); display:grid; place-items:center; flex:none; }
-.m .ib svg { width:22px; height:22px; }
-.m .t { font-size:17px; color:#2b3850; }
-.m .v { font-size:32px; font-weight:800; margin-top:14px; font-variant-numeric:tabular-nums; }
-.m .n { color:var(--muted); font-size:14.5px; margin-top:8px; }
-.tag { display:inline-block; margin-top:10px; padding:5px 12px; border-radius:9px; font-size:14px; font-weight:600; }
-.tag.ok { background:var(--ok-bg); color:var(--ok); } .tag.mid { background:var(--mid-bg); color:var(--mid); } .tag.low { background:var(--low-bg); color:var(--low); }
-
-.grid2 { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:22px; align-items:start; }
-.rv { margin-bottom:22px; }
-.rv .top { display:flex; justify-content:space-between; gap:12px; align-items:baseline; margin-bottom:10px; }
-.rv .nm { font-size:18px; }
-.rv .sm { font-size:18px; font-weight:750; font-variant-numeric:tabular-nums; white-space:nowrap; }
-.rv .bar { height:16px; background:var(--track); border-radius:999px; overflow:hidden; }
-.rv .fill { height:100%; border-radius:999px; min-width:4px; transition:width .6s ease; }
-.rv .kl { margin-top:7px; color:var(--muted); font-size:13.5px; font-variant-numeric:tabular-nums; }
-.rv .kl b { color:var(--ok); }
-.rv.auto { padding-top:18px; border-top:1px dashed var(--line); }
-.rv.auto .nm { color:var(--muted); }
-.revtot { display:flex; justify-content:space-between; align-items:baseline; padding-top:14px; border-top:1px solid var(--line); color:var(--muted); }
-.revtot b { color:var(--fg); font-size:22px; font-variant-numeric:tabular-nums; }
-table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
-th, td { text-align:right; padding:11px 8px; border-bottom:1px solid var(--line); white-space:nowrap; }
-th:first-child, td:first-child { text-align:left; }
-th { color:var(--muted); font-weight:600; font-size:13px; }
-td { font-size:15px; } td:first-child { font-weight:600; }
-tfoot td { font-weight:750; border-bottom:0; }
-.tbl { overflow-x:auto; }
-.warn { background:var(--mid-bg); color:var(--mid); border-radius:12px; padding:10px 14px; font-size:14px; margin-bottom:18px; }
-.foot { color:var(--muted); font-size:13px; margin:0; }
-
-/* Voronka: har bir etap — markazlangan to'g'ri burchakli ustun, eni shu etapga yetgan lidlar soniga mos */
-.fn { display:flex; flex-direction:column; gap:6px; margin-top:6px; }
-.fr { display:grid; grid-template-columns:200px minmax(0,1fr) 190px; gap:18px; align-items:center; }
-.fr .nm { font-size:14.5px; font-weight:650; color:#2b3850; }
-.fr .nm small { display:block; font-weight:500; color:var(--muted); font-size:12.5px; }
-.fr .tr { position:relative; height:38px; display:flex; justify-content:center; }
-.fr .bx { height:100%; min-width:46px; border-radius:8px; display:grid; place-items:center; color:#fff; font-weight:750;
-  font-size:15px; font-variant-numeric:tabular-nums; transition:width .6s ease; }
-.fr .st { font-variant-numeric:tabular-nums; font-size:13.5px; color:var(--muted); line-height:1.35; }
-.fr .st b { color:var(--fg); font-size:15px; }
-.fr .st .ls { color:var(--low); font-weight:600; }
-.fr.rf { margin-top:14px; padding-top:14px; border-top:1px dashed var(--line); }
-.fr.rf .st .rs { color:var(--low); font-weight:650; }
-.rg { display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:24px; align-items:center; }
-#rgmap { width:100%; height:auto; display:block; }
-#rgmap path { stroke:#fff; stroke-width:1; cursor:pointer; transition:fill .3s; }
-#rgmap path:hover, #rgmap path.on { stroke:#0b2a55; stroke-width:2; }
-.rgside { display:grid; gap:12px; }
-.rgfill, .rginfo { border:1px solid var(--line); border-radius:14px; padding:12px 14px; font-size:14px; color:var(--muted); }
-.rgfill b, .rginfo b { color:var(--fg); }
-.rginfo .big { font-size:28px; font-weight:800; color:#185FA5; }
-.rgbar { height:7px; border-radius:4px; background:var(--line); margin-top:8px; overflow:hidden; } .rgbar i { display:block; height:100%; background:#378ADD; }
-.rgleg { display:flex; gap:4px; align-items:center; font-size:12px; color:var(--muted); } .rgleg span { width:24px; height:9px; border-radius:2px; }
-.rgh { margin:22px 0 8px; font-size:16px; }
-.pp { display:flex; gap:6px; justify-content:flex-end; } .rginfo .pp { justify-content:flex-start; margin-top:8px; }
-.pp span { font-size:12.5px; font-weight:650; padding:2px 8px; border-radius:7px; white-space:nowrap; }
-.pp .qp { background:#FAEEDA; color:#854F0B; } .pp .tp { background:#EAF3DE; color:#27500A; } .pp .z { opacity:.45; }
-.rr { display:grid; grid-template-columns:150px minmax(0,1fr) 70px 190px; gap:14px; align-items:center; padding:6px 0; font-size:14.5px; border-top:1px solid var(--line); }
-.rr .tr { height:12px; border-radius:6px; background:var(--line); overflow:hidden; } .rr .tr i { display:block; height:100%; background:#378ADD; border-radius:6px; }
-.rr .v { text-align:right; font-variant-numeric:tabular-nums; } .rr .v em { font-style:normal; color:#3B6D11; font-weight:650; }
-.rr.none { color:var(--muted); } .rr.none .tr i { background:#cbd5e1; }
-@media (max-width: 800px) { .rg { grid-template-columns:minmax(0,1fr); } .rr { grid-template-columns:110px minmax(0,1fr) 60px; gap:6px 8px; font-size:13.5px; } .rr .pp { grid-column:1 / -1; justify-content:flex-start; } }
-.fc { display:grid; grid-template-columns:200px minmax(0,1fr) 190px; gap:18px; }
-.fc span { grid-column:2; justify-self:center; font-size:12.5px; font-weight:650; color:var(--ifg); background:var(--ibg);
-  padding:2px 10px; border-radius:999px; font-variant-numeric:tabular-nums; }
-.fsum { display:flex; flex-wrap:wrap; gap:10px 28px; justify-content:space-between; margin-top:20px; padding-top:16px;
-  border-top:1px solid var(--line); color:var(--muted); font-size:15px; }
-.fsum b { color:var(--blue); font-variant-numeric:tabular-nums; } .fsum b.r { color:var(--low); }
-@media (max-width: 1150px) { .hero { grid-template-columns:repeat(2, minmax(0,1fr)); } .mgrid { grid-template-columns:repeat(2, minmax(0,1fr)); }
-  .m:nth-child(4n) { border-right:1px solid var(--line); } .m:nth-child(2n) { border-right:0; } .grid2 { grid-template-columns:minmax(0,1fr); } }
-@media (max-width: 800px) { .fr, .fc { grid-template-columns:minmax(0,1fr) auto; gap:4px 12px; }
-  .fr .tr { grid-column:1 / -1; grid-row:2; justify-content:flex-start; height:30px; } .fr .st { text-align:right; }
-  .fc span { grid-column:1 / -1; justify-self:start; } }
-@media (max-width: 600px) { .page { padding:18px 14px 30px; } .hero, .mgrid { grid-template-columns:1fr; } .m { border-right:0 !important; }
-  h1 { font-size:30px; } .hc .v { font-size:30px; } .panel { padding:20px 18px; } .pnote { margin-left:0; } }
+/* Layout: same visual system as the daily reports — green hero with the sun, latest-day card, trend chart, day list, manager heat */
+:root{
+  --bg:#f5f6f0; --panel:#ffffff; --panel-2:#eef1e9; --ink:#13241b; --muted:#5d6b62; --line:#e0e5dc;
+  --hero:#0f3324; --hero-ink:#f3f6ef; --hero-muted:#a9c2b3; --sun:#f3b63f;
+  --green:#1f8a55; --green-soft:#dff1e6; --amber:#b9770a; --amber-soft:#fbefd6; --red:#c4423a; --red-soft:#fbe3e0; --blue:#2f6db5; --grey:#b6beb6;
+  --f-display:"Fraunces",Georgia,serif; --f-body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif; --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --r:18px; --shadow:0 1px 2px rgba(19,36,27,.04),0 8px 24px rgba(19,36,27,.05);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c1310; --panel:#141d18; --panel-2:#1a251f; --ink:#e7efe9; --muted:#93a399; --line:#25312a;
+  --hero:#0a2419; --hero-ink:#eef4ef; --hero-muted:#8fb09e; --sun:#f5bd4f;
+  --green:#4fc98a; --green-soft:#16301f; --amber:#f0ac3c; --amber-soft:#35290f; --red:#f07468; --red-soft:#3a1c19; --blue:#6da6ea; --grey:#4d5a52; --shadow:none; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1310; --panel:#141d18; --panel-2:#1a251f; --ink:#e7efe9; --muted:#93a399; --line:#25312a;
+  --hero:#0a2419; --hero-ink:#eef4ef; --hero-muted:#8fb09e; --sun:#f5bd4f;
+  --green:#4fc98a; --green-soft:#16301f; --amber:#f0ac3c; --amber-soft:#35290f; --red:#f07468; --red-soft:#3a1c19; --blue:#6da6ea; --grey:#4d5a52; --shadow:none; color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.gut{max-width:1160px;margin:0 auto;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+.hero{background:var(--hero);color:var(--hero-ink);position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;width:520px;height:520px;right:-140px;top:-260px;border-radius:50%;
+  background:radial-gradient(circle,var(--sun) 0 22%,rgba(243,182,63,.35) 23% 34%,rgba(243,182,63,.12) 35% 52%,transparent 53%)}
+.hero .gut{position:relative;padding-block:38px 34px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:end}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--sun)}
+.hero h1{font-family:var(--f-display);font-weight:400;font-size:clamp(32px,5vw,52px);line-height:1.04;margin:10px 0 0;letter-spacing:-.01em}
+.hero p{color:var(--hero-muted);margin:12px 0 0;max-width:52ch;font-size:15px}
+.latest{display:block;position:relative;text-decoration:none;color:inherit;background:color-mix(in srgb,var(--hero) 84%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:18px 20px;transition:background .15s}
+.latest:hover{background:color-mix(in srgb,var(--hero) 70%,transparent)}
+.latest .t{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;color:var(--hero-muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.latest .t b{color:var(--sun)}
+.latest h2{font-family:var(--f-display);font-weight:400;font-size:26px;margin:6px 0 12px}
+.lk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.lk div{display:flex;flex-direction:column}
+.lk b{font-family:var(--f-display);font-weight:400;font-size:28px;line-height:1.1}
+.lk span{font-size:11.5px;color:var(--hero-muted)}
+.lk .sun b{color:var(--sun)}
+main.gut{display:flex;flex-direction:column;gap:36px;padding-block:34px 60px}
+.sh{display:flex;justify-content:space-between;align-items:flex-end;gap:8px 16px;flex-wrap:wrap;margin-bottom:14px}
+.sh h2{font-family:var(--f-display);font-weight:400;font-size:28px;margin:0}
+.sh p{margin:0;color:var(--muted);font-size:13px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow);min-width:0}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:10px;border-radius:3px}
+.chart{position:relative;overflow-x:auto}
+.chart svg{display:block;min-width:520px}
+.chart text{fill:var(--muted);font-family:var(--f-body);font-size:11px}
+.tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.14);padding:10px 12px;font-size:12.5px;z-index:3;display:flex;flex-direction:column;gap:2px;white-space:nowrap}
+.tip .s{color:var(--muted)}
+.tbl{overflow:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{position:sticky;top:0;background:var(--panel);text-align:left;font-size:11.5px;color:var(--muted);font-weight:700;padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--panel-2)}
+.r{text-align:right}
+td a{color:var(--ink);font-weight:800;text-decoration:none}
+td a:hover{text-decoration:underline}
+.pill{display:inline-block;min-width:46px;text-align:center;font-weight:800;font-size:12px;padding:3px 8px;border-radius:999px}
+.lv3{background:var(--green-soft);color:var(--green)} .lv2{background:var(--amber-soft);color:var(--amber)} .lv1{background:var(--red-soft);color:var(--red)} .lv0{background:var(--panel-2);color:var(--muted)}
+.heat{border-collapse:separate;border-spacing:5px;width:auto;min-width:100%}
+.heat td,.heat th{border:none;padding:10px 12px;text-align:center}
+.heat th{background:none;position:static}
+.heat td{border-radius:10px;font-weight:800}
+.heat td.nm{text-align:left;padding-left:0;background:none}
+.empty{color:var(--muted);font-size:13.5px;margin:0}
+footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:16px}
+@media (max-width:820px){.hero .gut{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
-<div class="page">
-  <header>
-    <div>
-      <h1>Dashboard</h1>
-      <p class="sub" id="sub">Sun High-Tech · kurslar sotuv bo'limi · ma'lumotlar Odoo'dan</p>
-    </div>
-    <div class="live" id="live"><i></i><span id="upd">Yuklanmoqda…</span></div>
-  </header>
 
-  <div class="tabs" id="tabs">
-    <button data-p="all" class="on">Barcha kunlar</button>
-    <button data-p="today">Bugun</button>
-    <button data-p="7d">Oxirgi 7 kun</button>
-    <span class="sep"></span>
-    <input type="date" id="date" title="Aniq sana">
+<section class="hero"><div class="gut">
+  <div>
+    <div class="eyebrow">GetGreen · Sun High Tech</div>
+    <h1>Sotuv bo'limi paneli</h1>
+    <p>Har kuni 21:00 da Odoo'dan lidlar va qo'ng'iroqlar yig'iladi, yozuvlar tinglanib sotuv skriptiga solishtiriladi.</p>
   </div>
+  <a class="latest" id="latest"></a>
+</div></section>
 
-  <section class="hero" id="hero"></section>
-
-  <section class="panel">
-    <div class="ph"><div class="ib" data-i="chart"></div><h2>Umumiy ko'rsatkichlar</h2></div>
-    <p class="pnote">Foiz = ko'rsatkich ÷ yangi lidlar × 100. Qo'ng'iroqlar menejerning barcha qo'ng'iroqlari (teg filtri faqat lidlarga), shuning uchun 100% dan oshishi mumkin.</p>
-    <div class="mgrid" id="mgrid"></div>
+<main class="gut">
+  <section class="card">
+    <div class="sh" style="margin-bottom:6px"><h2>Kunlar dinamikasi</h2><p>Ustun — berilgan lidlar, chiziq — skriptga amal qilish %</p></div>
+    <div class="legend"><span><i style="background:var(--green)"></i>Ishlangan lidlar</span><span><i style="background:var(--grey)"></i>Tegilmagan</span><span><i style="background:var(--sun);height:3px"></i>Skript %</span><span><i style="background:var(--blue);border-radius:50%;width:10px"></i>Sotuv</span></div>
+    <div class="chart" id="chart"></div>
   </section>
 
-  <section class="panel">
-    <div class="ph"><div class="ib" data-i="funnel"></div><h2>Sotuv voronkasi</h2></div>
-    <p class="pnote" id="fnnote">Shu davrda kelgan lidlar: har bir etapga nechtasi yetib kelgan (hozir shu yoki keyingi etapda). To'lov etaplariga shu davrda o'tkazilgan oldingi kunlardagi lidlar ham qo'shiladi. Yopilgan — shu etapda yopilgan (lost) lidlar.</p>
-    <div class="fn" id="fn"></div>
-    <div class="fsum" id="fsum"></div>
+  <section>
+    <div class="sh"><h2>Barcha kunlar</h2><p>Qatorni bosing — o'sha kunning to'liq hisoboti ochiladi</p></div>
+    <div class="tbl"><table><thead><tr><th>Sana</th><th class="r">Berilgan</th><th class="r">Ishlangan</th><th class="r">Tegilmagan</th><th class="r">Yopilgan</th><th class="r">Sotuv</th><th class="r">Qo'ng'iroq</th><th class="r">Daqiqa</th><th>Skript</th><th>PDF</th></tr></thead><tbody id="days"></tbody></table></div>
   </section>
 
-  <section class="panel">
-    <div class="ph"><div class="ib" data-i="map"></div><h2>Mijozlar hududi</h2></div>
-    <p class="pnote" id="rgnote">Shu davrda kelgan lidlar Odoo'dagi "Регион" maydoni bo'yicha. 12 ta etapdagi lidlar (yopilganlar ham). Rang — lidlar soni; alohida: hozir QISMAN TO'LOV va TO'LIQ TO'LOV etapidagilar; yashil nuqta — ikkalasi jami.</p>
-    <div class="rg">
-      <svg id="rgmap" viewBox="0 0 520 330"></svg>
-      <div class="rgside"><div class="rgfill" id="rgfill"></div><div class="rginfo" id="rginfo">Viloyat ustiga olib boring</div><div class="rgleg" id="rgleg"></div></div>
-    </div>
-    <h3 class="rgh">Hududlar reytingi</h3>
-    <div id="rgrank"></div>
+  <section class="card">
+    <div class="sh" style="margin-bottom:6px"><h2>Menejerlar: skriptga amal qilish</h2><p>Kunlar bo'yicha, to'liq suhbatlarda</p></div>
+    <div style="overflow-x:auto"><table class="heat" id="heat"></table></div>
   </section>
 
-  <div class="grid2">
-    <section class="panel">
-      <div class="ph"><div class="ib" data-i="wallet"></div><h2>Xodimlar tushumi</h2></div>
-      <p class="pnote" id="revnote">Har bir xodimning jami tushumi, so'm</p>
-      <div id="revwarn"></div>
-      <div id="rev"></div>
-      <div class="revtot"><span>Jami tushum</span><b id="revsum">—</b></div>
-    </section>
-    <section class="panel">
-      <div class="ph"><div class="ib" data-i="users"></div><h2>Menejerlar</h2></div>
-      <p class="pnote">Tanlangan davr bo'yicha. Calltime — gaplashilgan qo'ng'iroqlarning umumiy vaqti.</p>
-      <div class="tbl"><table>
-        <thead><tr><th>Menejer</th><th>Yangi lid</th><th>Chiquvchi</th><th>Gaplashgan</th><th>Calltime</th><th>To'liq to'lov</th></tr></thead>
-        <tbody id="tbody"></tbody><tfoot id="tfoot"></tfoot>
-      </table></div>
-    </section>
-  </div>
+  <footer id="foot"></footer>
+</main>
 
-  <p class="foot">Tushum — lidlardagi "Бюджет !" maydoni (12 ta kurs etapi); kunlik tushum kunlik holatlar farqidan hisoblanadi.
-    Avtoto'lov (bot) menejerlar KPI'siga kirmaydi. Sahifa har 30 soniyada o'zi yangilanadi.</p>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script>
-const ICONS = {
-  wallet: '<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a1 1 0 0 1 1 1v3"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-3"/><path d="M17 12h4v4h-4a2 2 0 0 1 0-4z"/>',
-  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
-  check: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
-  clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
-  out: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/><path d="M15 3h6v6"/><path d="M21 3l-6 6"/>',
-  talk: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
-  miss: '<path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.4 19.4 0 0 1-3.33-2.67M5.68 11.68A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91"/><path d="M22 2 2 22"/>',
-  x: '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/>',
-  pct: '<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
-  timer: '<path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/>',
-  refund: '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>',
-  map: '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/>',
-  funnel: '<path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>',
-  chart: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 17v-5M12 17V7M16 17v-3"/>',
-};
-const svg = (k) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</svg>`;
-document.querySelectorAll('[data-i]').forEach((e) => { e.innerHTML = svg(e.dataset.i); });
+const DATA = {"days": [{"day": "2026-10-26", "assigned": 56, "worked": 56, "untouched": 0, "closed": 6, "won": 0, "calls": 109, "talk_min": 117, "recorded": 36, "script": 75, "managers": {"Muhammadamin": {"assigned": 15, "untouched": 0, "calls": 37, "script": 74}, "Go'zal": {"assigned": 14, "untouched": 0, "calls": 20, "script": 81}, "Xurliqo": {"assigned": 16, "untouched": 0, "calls": 24, "script": 77}, "Shaxina": {"assigned": 10, "untouched": 0, "calls": 28, "script": 69}, "Nurangiz": {"assigned": 1, "untouched": 0, "calls": 0, "script": null}}, "seller": {"Muhammadamin": {"assigned": 15, "won": 0, "conv": 0.0, "dur": 47, "leads": 22, "attn": {"shift": "11:00–18:00", "came": "14:06", "left": "18:09", "late": 186, "early": 0, "gap": 1, "first": "14:16", "second": "14:17", "ok": false}, "leads_new": 11, "leads_old": 11, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 37, "answered": 12, "missed": 22, "avg": 252, "longest": 856, "buckets": [2.0, 9.5, 3.9, 31.5]}, "Go'zal": {"assigned": 14, "won": 0, "conv": 0.0, "dur": 20, "leads": 17, "attn": {"shift": "14:00–19:00", "came": "16:10", "left": "18:00", "late": 130, "early": 60, "gap": 19, "first": "16:20", "second": "16:39", "ok": false}, "leads_new": 14, "leads_old": 3, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 20, "answered": 8, "missed": 8, "avg": 193, "longest": 346, "buckets": [1.6, 4.0, 3.2, 11.5]}, "Xurliqo": {"assigned": 16, "won": 0, "conv": 0.0, "dur": 24, "leads": 21, "attn": {"shift": "14:00–19:00", "came": "15:14", "left": "17:51", "late": 74, "early": 69, "gap": 1, "first": "15:24", "second": "15:25", "ok": false}, "leads_new": 16, "leads_old": 5, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 24, "answered": 5, "missed": 14, "avg": 451, "longest": 674, "buckets": [2.1, 0.0, 0.0, 21.6]}, "Shaxina": {"assigned": 10, "won": 0, "conv": 0.0, "dur": 27, "leads": 12, "attn": {"shift": "11:00–18:00", "came": "11:09", "left": "17:01", "late": 9, "early": 59, "gap": 16, "first": "11:19", "second": "11:35", "ok": false}, "leads_new": 1, "leads_old": 11, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 28, "answered": 11, "missed": 14, "avg": 172, "longest": 587, "buckets": [2.2, 9.7, 4.8, 9.8]}, "Nurangiz": {"assigned": 1, "won": 0, "conv": 0.0, "dur": 0, "leads": 0, "attn": {"shift": "11:00–15:00", "ok": false, "absent": true}, "leads_new": 0, "leads_old": 0, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 0, "answered": 0, "missed": 0, "avg": 0, "longest": 0, "buckets": [0.0, 0.0, 0.0, 0.0]}}, "pdf": true}, {"day": "2026-10-27", "assigned": 90, "worked": 90, "untouched": 0, "closed": 13, "won": 0, "calls": 155, "talk_min": 198, "recorded": 51, "script": 86, "managers": {"Muhammadamin": {"assigned": 20, "untouched": 0, "calls": 48, "script": 89}, "Go'zal": {"assigned": 30, "untouched": 0, "calls": 34, "script": 70}, "Xurliqo": {"assigned": 20, "untouched": 0, "calls": 30, "script": 88}, "Shaxina": {"assigned": 20, "untouched": 0, "calls": 43, "script": 90}, "Nurangiz": {"assigned": 0, "untouched": 0, "calls": 0, "script": null}}, "seller": {"Muhammadamin": {"assigned": 20, "won": 0, "conv": 0.0, "dur": 52, "leads": 30, "attn": {"shift": "11:00–18:00", "came": "11:45", "left": "18:11", "late": 45, "early": 0, "gap": 4, "first": "11:55", "second": "11:59", "ok": false}, "leads_new": 20, "leads_old": 10, "att": false, "ok": {"conv": false, "dur": false, "leads": true, "att": false}, "sum": 15000, "calls": 48, "answered": 15, "missed": 32, "avg": 237, "longest": 475, "buckets": [2.3, 6.1, 4.6, 39.2]}, "Go'zal": {"assigned": 30, "won": 0, "conv": 0.0, "dur": 25, "leads": 22, "attn": {"shift": "14:00–19:00", "came": "14:33", "left": "17:53", "late": 33, "early": 67, "gap": 2, "first": "14:43", "second": "14:45", "ok": false}, "leads_new": 20, "leads_old": 2, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 34, "answered": 12, "missed": 21, "avg": 134, "longest": 549, "buckets": [4.2, 5.3, 6.2, 9.2]}, "Xurliqo": {"assigned": 20, "won": 0, "conv": 0.0, "dur": 68, "leads": 22, "attn": {"shift": "14:00–19:00", "came": "13:52", "left": "18:29", "late": 0, "early": 31, "gap": 1, "first": "14:02", "second": "14:03", "ok": false}, "leads_new": 15, "leads_old": 7, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 30, "answered": 12, "missed": 17, "avg": 496, "longest": 889, "buckets": [2.4, 1.1, 0.0, 64.2]}, "Shaxina": {"assigned": 20, "won": 0, "conv": 0.0, "dur": 54, "leads": 31, "attn": {"shift": "11:00–18:00", "came": "12:09", "left": "17:47", "late": 69, "early": 13, "gap": 4, "first": "12:19", "second": "12:23", "ok": false}, "leads_new": 20, "leads_old": 11, "att": false, "ok": {"conv": false, "dur": false, "leads": true, "att": false}, "sum": 15000, "calls": 43, "answered": 12, "missed": 26, "avg": 266, "longest": 604, "buckets": [2.3, 1.2, 12.9, 37.2]}, "Nurangiz": {"assigned": 0, "won": 0, "conv": 0, "dur": 0, "leads": 0, "attn": {"shift": "11:00–18:00", "ok": false, "absent": true}, "leads_new": 0, "leads_old": 0, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 0, "answered": 0, "missed": 0, "avg": 0, "longest": 0, "buckets": [0.0, 0.0, 0.0, 0.0]}}, "pdf": true}, {"day": "2026-10-28", "assigned": 138, "worked": 128, "untouched": 10, "closed": 12, "won": 0, "calls": 153, "talk_min": 113, "recorded": 39, "script": 80, "managers": {"Muhammadamin": {"assigned": 16, "untouched": 0, "calls": 47, "script": 68}, "Go'zal": {"assigned": 18, "untouched": 0, "calls": 45, "script": 95}, "Xurliqo": {"assigned": 0, "untouched": 0, "calls": 0, "script": null}, "Shaxina": {"assigned": 20, "untouched": 10, "calls": 27, "script": 70}, "Nurangiz": {"assigned": 84, "untouched": 0, "calls": 34, "script": 89}}, "seller": {"Muhammadamin": {"assigned": 16, "won": 0, "conv": 0.0, "dur": 27, "leads": 26, "attn": {"shift": "11:00–18:00", "came": "11:32", "left": "17:44", "late": 32, "early": 16, "gap": 47, "first": "11:42", "second": "12:29", "ok": false}, "leads_new": 6, "leads_old": 20, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 47, "answered": 12, "missed": 29, "avg": 159, "longest": 496, "buckets": [3.4, 7.5, 3.1, 13.3]}, "Go'zal": {"assigned": 18, "won": 0, "conv": 0.0, "dur": 36, "leads": 32, "attn": {"shift": "14:00–19:00", "came": "13:58", "left": "18:36", "late": 0, "early": 24, "gap": 27, "first": "14:08", "second": "14:35", "ok": false}, "leads_new": 17, "leads_old": 15, "att": false, "ok": {"conv": false, "dur": false, "leads": true, "att": false}, "sum": 15000, "calls": 45, "answered": 13, "missed": 26, "avg": 210, "longest": 777, "buckets": [3.6, 4.1, 15.6, 12.9]}, "Xurliqo": {"assigned": 0, "won": 0, "conv": 0, "dur": 0, "leads": 0, "attn": {"shift": "14:00–19:00", "ok": false, "absent": true}, "leads_new": 0, "leads_old": 0, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 0, "answered": 0, "missed": 0, "avg": 0, "longest": 0, "buckets": [0.0, 0.0, 0.0, 0.0]}, "Shaxina": {"assigned": 20, "won": 0, "conv": 0.0, "dur": 23, "leads": 18, "attn": {"shift": "11:00–18:00", "came": "11:14", "left": "18:00", "late": 14, "early": 0, "gap": 12, "first": "11:24", "second": "11:36", "ok": false}, "leads_new": 10, "leads_old": 8, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 27, "answered": 7, "missed": 16, "avg": 201, "longest": 608, "buckets": [1.7, 6.3, 0.0, 15.5]}, "Nurangiz": {"assigned": 84, "won": 0, "conv": 0.0, "dur": 25, "leads": 22, "attn": {"shift": "11:00–18:00", "came": "11:45", "left": "17:23", "late": 45, "early": 37, "gap": 34, "first": "11:55", "second": "12:29", "ok": false}, "leads_new": 14, "leads_old": 8, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 34, "answered": 8, "missed": 23, "avg": 214, "longest": 438, "buckets": [1.9, 1.2, 8.3, 13.9]}}, "pdf": true}, {"day": "2026-10-29", "assigned": 148, "worked": 136, "untouched": 12, "closed": 41, "won": 1, "calls": 307, "talk_min": 219, "recorded": 109, "script": 88, "managers": {"Muhammadamin": {"assigned": 30, "untouched": 4, "calls": 67, "script": 89}, "Go'zal": {"assigned": 56, "untouched": 0, "calls": 84, "script": 82}, "Xurliqo": {"assigned": 41, "untouched": 0, "calls": 82, "script": 95}, "Shaxina": {"assigned": 1, "untouched": 0, "calls": 0, "script": null}, "Nurangiz": {"assigned": 20, "untouched": 8, "calls": 74, "script": 89}}, "seller": {"Muhammadamin": {"assigned": 30, "won": 1, "conv": 3.3, "dur": 41, "leads": 39, "attn": {"shift": "11:00–18:00", "came": "11:09", "left": "17:54", "late": 9, "early": 6, "gap": 15, "first": "11:19", "second": "11:34", "ok": false}, "leads_new": 23, "leads_old": 16, "att": false, "ok": {"conv": false, "dur": false, "leads": true, "att": false}, "sum": 15000, "calls": 67, "answered": 19, "missed": 34, "avg": 166, "longest": 549, "buckets": [4.2, 9.1, 0.0, 27.5]}, "Go'zal": {"assigned": 56, "won": 0, "conv": 0.0, "dur": 69, "leads": 75, "attn": {"shift": "14:00–19:00", "came": "13:02", "left": "19:21", "late": 0, "early": 0, "gap": 12, "first": "13:12", "second": "13:24", "ok": true}, "leads_new": 56, "leads_old": 19, "att": true, "ok": {"conv": false, "dur": false, "leads": true, "att": true}, "sum": 25000, "calls": 84, "answered": 40, "missed": 40, "avg": 138, "longest": 410, "buckets": [11.9, 19.0, 25.4, 12.7]}, "Xurliqo": {"assigned": 41, "won": 0, "conv": 0.0, "dur": 66, "leads": 63, "attn": {"shift": "14:00–19:00", "came": "12:46", "left": "19:14", "late": 0, "early": 0, "gap": 0, "first": "12:56", "second": "12:56", "ok": true}, "leads_new": 41, "leads_old": 22, "att": true, "ok": {"conv": false, "dur": false, "leads": true, "att": true}, "sum": 25000, "calls": 82, "answered": 25, "missed": 42, "avg": 196, "longest": 844, "buckets": [7.2, 12.7, 3.7, 41.9]}, "Shaxina": {"assigned": 1, "won": 0, "conv": 0.0, "dur": 0, "leads": 0, "attn": {"shift": "11:00–18:00", "ok": false, "absent": true}, "leads_new": 0, "leads_old": 0, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 0, "answered": 0, "missed": 0, "avg": 0, "longest": 0, "buckets": [0.0, 0.0, 0.0, 0.0]}, "Nurangiz": {"assigned": 20, "won": 0, "conv": 0.0, "dur": 44, "leads": 42, "attn": {"shift": "11:00–18:00", "came": "11:05", "left": "18:11", "late": 5, "early": 0, "gap": 8, "first": "11:15", "second": "11:23", "ok": false}, "leads_new": 14, "leads_old": 28, "att": false, "ok": {"conv": false, "dur": false, "leads": true, "att": false}, "sum": 15000, "calls": 74, "answered": 25, "missed": 43, "avg": 136, "longest": 629, "buckets": [8.1, 10.2, 6.5, 18.7]}}, "pdf": true}, {"day": "2026-10-30", "assigned": 131, "worked": 126, "untouched": 5, "closed": 21, "won": 1, "calls": 274, "talk_min": 188, "recorded": 80, "script": 91, "managers": {"Muhammadamin": {"assigned": 1, "untouched": 0, "calls": 0, "script": null}, "Go'zal": {"assigned": 30, "untouched": 0, "calls": 48, "script": 95}, "Xurliqo": {"assigned": 40, "untouched": 0, "calls": 50, "script": 92}, "Shaxina": {"assigned": 50, "untouched": 0, "calls": 102, "script": 94}, "Nurangiz": {"assigned": 10, "untouched": 5, "calls": 74, "script": 84}}, "seller": {"Muhammadamin": {"assigned": 1, "won": 0, "conv": 0.0, "dur": 0, "leads": 0, "attn": {"shift": "11:00–18:00", "ok": false, "absent": true}, "leads_new": 0, "leads_old": 0, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 0, "answered": 0, "missed": 0, "avg": 0, "longest": 0, "buckets": [0.0, 0.0, 0.0, 0.0]}, "Go'zal": {"assigned": 30, "won": 1, "conv": 3.3, "dur": 27, "leads": 48, "attn": {"shift": "14:00–19:00", "came": "13:47", "left": "18:26", "late": 0, "early": 34, "gap": 1, "first": "13:57", "second": "13:58", "ok": false}, "leads_new": 30, "leads_old": 18, "att": false, "ok": {"conv": false, "dur": false, "leads": true, "att": false}, "sum": 15000, "calls": 48, "answered": 7, "missed": 35, "avg": 233, "longest": 529, "buckets": [3.2, 0.0, 0.0, 24.1]}, "Xurliqo": {"assigned": 40, "won": 0, "conv": 0.0, "dur": 19, "leads": 57, "attn": {"shift": "14:00–19:00", "came": "13:40", "left": "18:44", "late": 0, "early": 16, "gap": 1, "first": "13:50", "second": "13:51", "ok": false}, "leads_new": 40, "leads_old": 17, "att": false, "ok": {"conv": false, "dur": false, "leads": true, "att": false}, "sum": 15000, "calls": 50, "answered": 12, "missed": 29, "avg": 162, "longest": 329, "buckets": [3.0, 3.1, 7.0, 5.5]}, "Shaxina": {"assigned": 50, "won": 0, "conv": 0.0, "dur": 88, "leads": 88, "attn": {"shift": "11:00–18:00", "came": "10:44", "left": "18:45", "late": 0, "early": 0, "gap": 1, "first": "10:54", "second": "10:55", "ok": true}, "leads_new": 50, "leads_old": 38, "att": true, "ok": {"conv": false, "dur": false, "leads": true, "att": true}, "sum": 25000, "calls": 102, "answered": 34, "missed": 53, "avg": 182, "longest": 1020, "buckets": [9.2, 18.3, 8.1, 52.5]}, "Nurangiz": {"assigned": 10, "won": 0, "conv": 0.0, "dur": 54, "leads": 57, "attn": {"shift": "11:00–17:00", "came": "10:49", "left": "16:58", "late": 0, "early": 2, "gap": 3, "first": "10:59", "second": "11:02", "ok": false}, "leads_new": 5, "leads_old": 52, "att": false, "ok": {"conv": false, "dur": false, "leads": true, "att": false}, "sum": 15000, "calls": 74, "answered": 27, "missed": 41, "avg": 146, "longest": 537, "buckets": [6.8, 11.7, 15.7, 19.6]}}, "pdf": true}, {"day": "2026-10-31", "assigned": 124, "worked": 124, "untouched": 0, "closed": 23, "won": 0, "calls": 240, "talk_min": 107, "recorded": 56, "script": 75, "managers": {"Muhammadamin": {"assigned": 0, "untouched": 0, "calls": 56, "script": null}, "Go'zal": {"assigned": 37, "untouched": 0, "calls": 63, "script": 71}, "Xurliqo": {"assigned": 62, "untouched": 0, "calls": 79, "script": 86}, "Shaxina": {"assigned": 25, "untouched": 0, "calls": 42, "script": 79}, "Nurangiz": {"assigned": 0, "untouched": 0, "calls": 0, "script": null}}, "seller": {"Muhammadamin": {"assigned": 0, "won": 0, "conv": 0, "dur": 9, "secs": 523, "leads": 9, "attn": {"shift": "11:00–18:00", "came": "10:53", "left": "18:51", "late": 0, "early": 0, "gap": 1, "first": "11:03", "second": "11:04", "ok": true}, "leads_new": 0, "leads_old": 9, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "calls": 56, "answered": 13, "missed": 38, "avg": 54, "longest": 98, "buckets": [5.8, 2.9, 0.0, 0.0]}, "Go'zal": {"assigned": 37, "won": 0, "conv": 0.0, "dur": 50, "secs": 3023, "leads": 14, "attn": {"shift": "14:00–19:00", "came": "13:45", "left": "19:10", "late": 0, "early": 0, "gap": 21, "first": "13:55", "second": "14:16", "ok": true}, "leads_new": 9, "leads_old": 5, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "calls": 63, "answered": 18, "missed": 39, "avg": 196, "longest": 724, "buckets": [5.4, 9.6, 3.9, 31.4]}, "Xurliqo": {"assigned": 62, "won": 0, "conv": 0.0, "dur": 26, "secs": 1541, "leads": 13, "attn": {"shift": "14:00–19:00", "came": "11:39", "left": "19:10", "late": 0, "early": 0, "gap": 22, "first": "11:49", "second": "12:11", "ok": true}, "leads_new": 8, "leads_old": 5, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "calls": 79, "answered": 18, "missed": 53, "avg": 117, "longest": 622, "buckets": [6.5, 5.2, 3.6, 10.4]}, "Shaxina": {"assigned": 25, "won": 0, "conv": 0.0, "dur": 22, "secs": 1309, "leads": 5, "attn": {"shift": "11:00–18:00", "came": "11:05", "left": "18:33", "late": 5, "early": 0, "gap": 78, "first": "11:15", "second": "12:33", "ok": false}, "leads_new": 0, "leads_old": 5, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 42, "answered": 7, "missed": 24, "avg": 213, "longest": 700, "buckets": [2.1, 1.1, 7.0, 11.7]}, "Nurangiz": {"assigned": 0, "won": 0, "conv": 0, "dur": 0, "secs": 0, "leads": 0, "attn": {"shift": null, "ok": true, "off": true}, "leads_new": 0, "leads_old": 0, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 0, "answered": 0, "missed": 0, "avg": 0, "longest": 0, "buckets": [0.0, 0.0, 0.0, 0.0]}}, "tags": {}, "pdf": true}, {"day": "2026-11-01", "assigned": 177, "worked": 176, "untouched": 1, "closed": 46, "won": 0, "calls": 336, "talk_min": 237, "recorded": 99, "script": 87, "managers": {"Muhammadamin": {"assigned": 27, "untouched": 0, "calls": 59, "script": 82}, "Go'zal": {"assigned": 1, "untouched": 0, "calls": 24, "script": null}, "Xurliqo": {"assigned": 63, "untouched": 0, "calls": 82, "script": 91}, "Shaxina": {"assigned": 55, "untouched": 0, "calls": 84, "script": 81}, "Nurangiz": {"assigned": 31, "untouched": 1, "calls": 87, "script": 95}}, "seller": {"Muhammadamin": {"assigned": 27, "won": 0, "conv": 0.0, "dur": 45, "secs": 2694, "leads": 9, "attn": {"shift": "11:00–18:00", "came": "13:53", "left": "19:32", "late": 173, "early": 0, "gap": 1, "first": "14:03", "second": "14:04", "ok": false}, "leads_new": 6, "leads_old": 3, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 59, "answered": 17, "missed": 31, "avg": 231, "longest": 714, "buckets": [6.0, 3.0, 8.5, 27.3]}, "Go'zal": {"assigned": 1, "won": 0, "conv": 0.0, "dur": 2, "secs": 125, "leads": 0, "attn": {"shift": "14:00–19:00", "came": "13:45", "left": "17:54", "late": 0, "early": 66, "gap": 11, "first": "13:55", "second": "14:06", "ok": false}, "leads_new": 0, "leads_old": 0, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 24, "answered": 1, "missed": 11, "avg": 117, "longest": 117, "buckets": [0.1, 1.9, 0.0, 0.0]}, "Xurliqo": {"assigned": 63, "won": 0, "conv": 0.0, "dur": 47, "secs": 2804, "leads": 16, "attn": {"shift": "14:00–19:00", "came": "13:19", "left": "19:12", "late": 0, "early": 0, "gap": 25, "first": "13:29", "second": "13:54", "ok": true}, "leads_new": 14, "leads_old": 2, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "calls": 82, "answered": 21, "missed": 46, "avg": 166, "longest": 455, "buckets": [6.7, 6.5, 11.8, 21.8]}, "Shaxina": {"assigned": 55, "won": 0, "conv": 0.0, "dur": 67, "secs": 4012, "leads": 20, "attn": {"shift": "11:00–18:00", "came": "10:41", "left": "18:54", "late": 0, "early": 0, "gap": 2, "first": "10:51", "second": "10:53", "ok": true}, "leads_new": 18, "leads_old": 2, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "calls": 84, "answered": 30, "missed": 41, "avg": 161, "longest": 599, "buckets": [7.2, 18.5, 6.7, 34.4]}, "Nurangiz": {"assigned": 31, "won": 0, "conv": 0.0, "dur": 76, "secs": 4563, "leads": 19, "attn": {"shift": "11:00–18:00", "came": "11:40", "left": "19:33", "late": 40, "early": 0, "gap": 6, "first": "11:50", "second": "11:56", "ok": false}, "leads_new": 9, "leads_old": 10, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "calls": 87, "answered": 30, "missed": 47, "avg": 198, "longest": 776, "buckets": [8.8, 12.9, 3.2, 51.1]}}, "tags": {"Kasb_filtr": {"called": 142, "talked": 49, "managers": {"Muhammadamin": 3, "Go'zal": 0, "Xurliqo": 14, "Shaxina": 19, "Nurangiz": 14}}, "predzapis_lid": {"called": 27, "talked": 13, "managers": {"Muhammadamin": 5, "Go'zal": 0, "Xurliqo": 2, "Shaxina": 1, "Nurangiz": 5}}}, "callbacks": {"Muhammadamin": {"talked": 0, "tried": 0, "none": 0, "done_no_call": 0}, "Go'zal": {"talked": 0, "tried": 0, "none": 0, "done_no_call": 0}, "Xurliqo": {"talked": 0, "tried": 0, "none": 0, "done_no_call": 0}, "Shaxina": {"talked": 0, "tried": 0, "none": 0, "done_no_call": 0}, "Nurangiz": {"talked": 0, "tried": 0, "none": 0, "done_no_call": 0}}, "pdf": true}, {"day": "2026-11-02", "assigned": 206, "worked": 197, "untouched": 9, "closed": 48, "won": 0, "calls": 315, "talk_min": 160, "recorded": 71, "script": 86, "managers": {"Muhammadamin": {"assigned": 58, "untouched": 0, "calls": 90, "script": 100}, "Go'zal": {"assigned": 63, "untouched": 0, "calls": 88, "script": 84}, "Xurliqo": {"assigned": 75, "untouched": 0, "calls": 86, "script": 85}, "Shaxina": {"assigned": 0, "untouched": 0, "calls": 0, "script": null}, "Nurangiz": {"assigned": 10, "untouched": 9, "calls": 51, "script": 86}}, "seller": {"Muhammadamin": {"assigned": 58, "won": 0, "conv": 0.0, "dur": 31, "secs": 1882, "leads": 10, "attn": {"shift": "11:00–18:00", "came": "15:33", "left": "20:23", "late": 273, "early": 0, "gap": 11, "first": "15:43", "second": "15:54", "ok": false}, "leads_new": 8, "leads_old": 2, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"dur": 20000, "leads": 20000, "att": 20000}, "fine": 60000, "net": -60000, "calls": 90, "answered": 22, "missed": 63, "avg": 100, "longest": 374, "buckets": [8.2, 11.5, 0.0, 11.7]}, "Go'zal": {"assigned": 63, "won": 0, "conv": 0.0, "dur": 68, "secs": 4100, "leads": 14, "attn": {"shift": "14:00–19:00", "came": "13:38", "left": "19:21", "late": 0, "early": 0, "gap": 11, "first": "13:48", "second": "13:59", "ok": true}, "leads_new": 11, "leads_old": 3, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "fines": {"dur": 20000, "leads": 20000}, "fine": 40000, "net": -30000, "calls": 88, "answered": 19, "missed": 67, "avg": 253, "longest": 604, "buckets": [0.9, 14.2, 7.8, 45.3]}, "Xurliqo": {"assigned": 75, "won": 0, "conv": 0.0, "dur": 44, "secs": 2616, "leads": 18, "attn": {"shift": "14:00–19:00", "came": "13:09", "left": "19:18", "late": 0, "early": 0, "gap": 18, "first": "13:19", "second": "13:37", "ok": true}, "leads_new": 17, "leads_old": 1, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "fines": {"dur": 20000, "leads": 20000}, "fine": 40000, "net": -30000, "calls": 86, "answered": 24, "missed": 50, "avg": 125, "longest": 343, "buckets": [7.2, 13.7, 11.7, 11.1]}, "Shaxina": {"assigned": 0, "won": 0, "conv": 0, "dur": 0, "secs": 0, "leads": 0, "attn": {"shift": "11:00–18:00", "ok": false, "absent": true}, "leads_new": 0, "leads_old": 0, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"dur": 20000, "leads": 20000, "att": 20000}, "fine": 60000, "net": -60000, "calls": 0, "answered": 0, "missed": 0, "avg": 0, "longest": 0, "buckets": [0.0, 0.0, 0.0, 0.0]}, "Nurangiz": {"assigned": 10, "won": 0, "conv": 0.0, "dur": 17, "secs": 1014, "leads": 4, "attn": {"shift": "11:00–15:00", "came": "10:42", "left": "14:54", "late": 0, "early": 6, "gap": 4, "first": "10:52", "second": "10:56", "ok": false}, "leads_new": 0, "leads_old": 4, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"dur": 20000, "leads": 20000}, "fine": 40000, "net": -40000, "calls": 51, "answered": 6, "missed": 39, "avg": 194, "longest": 300, "buckets": [1.3, 2.1, 8.4, 5.0]}}, "tags": {"Kasb_filtr": {"called": 158, "talked": 41, "managers": {"Muhammadamin": 10, "Go'zal": 14, "Xurliqo": 17, "Shaxina": 0, "Nurangiz": 2}}, "predzapis_lid": {"called": 13, "talked": 5, "managers": {"Muhammadamin": 0, "Go'zal": 1, "Xurliqo": 2, "Shaxina": 0, "Nurangiz": 2}}}, "callbacks": {"Muhammadamin": {"talked": 0, "tried": 3, "none": 3, "done_no_call": 0}, "Go'zal": {"talked": 0, "tried": 1, "none": 4, "done_no_call": 1}, "Xurliqo": {"talked": 0, "tried": 2, "none": 11, "done_no_call": 7}, "Shaxina": {"talked": 0, "tried": 0, "none": 6, "done_no_call": 0}, "Nurangiz": {"talked": 0, "tried": 1, "none": 4, "done_no_call": 0}}, "pdf": true}, {"day": "2026-11-03", "assigned": 203, "worked": 203, "untouched": 0, "closed": 35, "won": 0, "calls": 352, "talk_min": 313, "recorded": 113, "script": 79, "managers": {"Muhammadamin": {"assigned": 63, "untouched": 0, "calls": 74, "script": 79}, "Go'zal": {"assigned": 61, "untouched": 0, "calls": 100, "script": 79}, "Xurliqo": {"assigned": 0, "untouched": 0, "calls": 0, "script": null}, "Shaxina": {"assigned": 39, "untouched": 0, "calls": 82, "script": 80}, "Nurangiz": {"assigned": 40, "untouched": 0, "calls": 96, "script": 77}}, "sday": {"Muhammadamin": {"name": "Muhammadamin", "new": 63, "noreach": 47, "full": 0, "partial": 0, "sent": 0, "closed": 13}, "Go'zal": {"name": "Go'zal", "new": 61, "noreach": 45, "full": 0, "partial": 0, "sent": 0, "closed": 8}, "Xurliqo": {"name": "Xurliqo", "new": 0, "noreach": 0, "full": 0, "partial": 0, "sent": 0, "closed": 1}, "Shaxina": {"name": "Shaxina", "new": 39, "noreach": 31, "full": 0, "partial": 0, "sent": 0, "closed": 5}, "Nurangiz": {"name": "Nurangiz", "new": 40, "noreach": 26, "full": 0, "partial": 0, "sent": 0, "closed": 8}}, "seller": {"Muhammadamin": {"assigned": 63, "won": 0, "conv": 0.0, "dur": 86, "secs": 5150, "leads": 18, "attn": {"shift": "11:00–18:00", "came": "14:43", "left": "18:57", "late": 223, "early": 0, "gap": 2, "first": "14:53", "second": "14:55", "ok": false}, "leads_new": 16, "leads_old": 2, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"dur": 20000, "leads": 20000, "att": 20000}, "fine": 60000, "net": -60000, "calls": 74, "answered": 30, "missed": 33, "avg": 201, "longest": 559, "buckets": [9.2, 12.8, 8.7, 55.1]}, "Go'zal": {"assigned": 61, "won": 0, "conv": 0.0, "dur": 79, "secs": 4733, "leads": 19, "attn": {"shift": "14:00–19:00", "came": "13:37", "left": "19:02", "late": 0, "early": 0, "gap": 0, "first": "13:47", "second": "13:47", "ok": true}, "leads_new": 14, "leads_old": 5, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "fines": {"dur": 20000, "leads": 20000}, "fine": 40000, "net": -30000, "calls": 100, "answered": 30, "missed": 62, "avg": 184, "longest": 629, "buckets": [7.5, 13.0, 15.3, 43.0]}, "Xurliqo": {"assigned": 0, "won": 0, "conv": 0, "dur": 0, "secs": 0, "leads": 0, "attn": {"shift": "14:00–19:00", "ok": false, "absent": true}, "leads_new": 0, "leads_old": 0, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"dur": 20000, "leads": 20000, "att": 20000}, "fine": 60000, "net": -60000, "calls": 0, "answered": 0, "missed": 0, "avg": 0, "longest": 0, "buckets": [0.0, 0.0, 0.0, 0.0]}, "Shaxina": {"assigned": 39, "won": 0, "conv": 0.0, "dur": 84, "secs": 5061, "leads": 19, "attn": {"shift": "11:00–18:00", "came": "10:40", "left": "18:12", "late": 0, "early": 0, "gap": 0, "first": "10:50", "second": "10:50", "ok": true}, "leads_new": 7, "leads_old": 12, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "fines": {"dur": 20000, "leads": 20000}, "fine": 40000, "net": -30000, "calls": 82, "answered": 26, "missed": 49, "avg": 208, "longest": 887, "buckets": [3.8, 15.6, 25.4, 39.5]}, "Nurangiz": {"assigned": 40, "won": 0, "conv": 0.0, "dur": 64, "secs": 3825, "leads": 19, "attn": {"shift": "11:00–18:00", "came": "11:07", "left": "18:25", "late": 7, "early": 0, "gap": 2, "first": "11:17", "second": "11:19", "ok": false}, "leads_new": 12, "leads_old": 7, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"dur": 20000, "leads": 20000}, "fine": 40000, "net": -40000, "calls": 96, "answered": 27, "missed": 46, "avg": 154, "longest": 452, "buckets": [8.1, 13.8, 15.1, 26.8]}}, "tags": {"Kasb_filtr": {"called": 136, "talked": 46, "managers": {"Muhammadamin": 10, "Go'zal": 11, "Xurliqo": 0, "Shaxina": 10, "Nurangiz": 17}}, "predzapis_lid": {"called": 21, "talked": 11, "managers": {"Muhammadamin": 2, "Go'zal": 5, "Xurliqo": 0, "Shaxina": 3, "Nurangiz": 2}}}, "callbacks": {"Muhammadamin": {"talked": 0, "tried": 0, "none": 6, "done_no_call": 0}, "Go'zal": {"talked": 0, "tried": 0, "none": 6, "done_no_call": 0}, "Xurliqo": {"talked": 1, "tried": 2, "none": 8, "done_no_call": 0}, "Shaxina": {"talked": 3, "tried": 1, "none": 3, "done_no_call": 1}, "Nurangiz": {"talked": 0, "tried": 0, "none": 9, "done_no_call": 1}}, "pdf": true}, {"day": "2026-11-05", "assigned": 144, "worked": 134, "untouched": 10, "closed": 5, "won": 0, "calls": 352, "talk_min": 630, "recorded": 112, "script": 80, "managers": {"Muhammadamin": {"assigned": 20, "untouched": 1, "calls": 71, "script": 88}, "Go'zal": {"assigned": 48, "untouched": 1, "calls": 86, "script": 81}, "Xurliqo": {"assigned": 26, "untouched": 2, "calls": 67, "script": 82}, "Shaxina": {"assigned": 0, "untouched": 0, "calls": 13, "script": null}, "Nurangiz": {"assigned": 50, "untouched": 6, "calls": 115, "script": 72}}, "sday": {"Muhammadamin": {"name": "Muhammadamin", "new": 20, "noreach": 7, "full": 0, "partial": 3, "sent": 3, "closed": 0}, "Go'zal": {"name": "Go'zal", "new": 48, "noreach": 22, "full": 0, "partial": 5, "sent": 0, "closed": 2}, "Xurliqo": {"name": "Xurliqo", "new": 26, "noreach": 7, "full": 0, "partial": 7, "sent": 0, "closed": 0}, "Shaxina": {"name": "Shaxina", "new": 0, "noreach": 0, "full": 0, "partial": 0, "sent": 0, "closed": 0}, "Nurangiz": {"name": "Nurangiz", "new": 50, "noreach": 27, "full": 0, "partial": 16, "sent": 0, "closed": 3}}, "seller": {"Muhammadamin": {"assigned": 20, "won": 0, "conv": 0.0, "dur": 112, "secs": 6718, "leads": 11, "attn": {"shift": "11:00–18:00", "came": "11:10", "left": "17:34", "late": 10, "early": 26, "gap": 1, "first": "11:20", "second": "11:21", "ok": false}, "leads_new": 10, "leads_old": 1, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"leads": 20000, "att": 20000}, "fine": 40000, "net": -40000, "calls": 71, "answered": 13, "missed": 43, "avg": 514, "longest": 1265, "buckets": [1.2, 1.4, 7.7, 101.7]}, "Go'zal": {"assigned": 48, "won": 0, "conv": 0.0, "dur": 186, "secs": 11183, "leads": 25, "attn": {"shift": "14:00–19:00", "came": "12:49", "left": "19:36", "late": 0, "early": 0, "gap": 8, "first": "12:59", "second": "13:07", "ok": true}, "leads_new": 23, "leads_old": 2, "att": true, "ok": {"conv": false, "dur": true, "leads": false, "att": true}, "sum": 25000, "fines": {"leads": 20000}, "fine": 20000, "net": 5000, "calls": 86, "answered": 31, "missed": 46, "avg": 371, "longest": 1327, "buckets": [2.0, 15.2, 18.0, 151.2]}, "Xurliqo": {"assigned": 26, "won": 0, "conv": 0.0, "dur": 171, "secs": 10235, "leads": 23, "attn": {"shift": "14:00–19:00", "came": "12:41", "left": "20:12", "late": 0, "early": 0, "gap": 0, "first": "12:51", "second": "12:51", "ok": true}, "leads_new": 17, "leads_old": 6, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "fines": {"leads": 20000}, "fine": 20000, "net": -10000, "calls": 67, "answered": 28, "missed": 28, "avg": 406, "longest": 1526, "buckets": [5.3, 8.3, 12.8, 144.1]}, "Shaxina": {"assigned": 0, "won": 0, "conv": 0, "dur": 27, "secs": 1597, "leads": 2, "attn": {"shift": "11:00–18:00", "came": "09:42", "left": "22:22", "late": 0, "early": 0, "gap": 8, "first": "09:52", "second": "10:00", "ok": true}, "leads_new": 0, "leads_old": 2, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "fines": {"dur": 20000, "leads": 20000}, "fine": 40000, "net": -30000, "calls": 13, "answered": 5, "missed": 7, "avg": 394, "longest": 1367, "buckets": [1.1, 2.8, 0.0, 22.8]}, "Nurangiz": {"assigned": 50, "won": 0, "conv": 0.0, "dur": 134, "secs": 8038, "leads": 33, "attn": {"shift": "11:00–18:00", "came": "10:36", "left": "22:29", "late": 0, "early": 0, "gap": 8, "first": "10:46", "second": "10:54", "ok": true}, "leads_new": 23, "leads_old": 10, "att": true, "ok": {"conv": false, "dur": false, "leads": true, "att": true}, "sum": 25000, "fines": {}, "fine": 0, "net": 25000, "calls": 115, "answered": 45, "missed": 53, "avg": 212, "longest": 646, "buckets": [7.1, 33.6, 20.0, 73.3]}}, "tags": {"04.11 BotReg": {"called": 83, "talked": 39, "managers": {"Muhammadamin": 3, "Go'zal": 15, "Xurliqo": 11, "Shaxina": 0, "Nurangiz": 13}}, "04.11 BotDeposit": {"called": 48, "talked": 39, "managers": {"Muhammadamin": 7, "Go'zal": 9, "Xurliqo": 12, "Shaxina": 1, "Nurangiz": 13}}, "predzapis_lid": {"called": 7, "talked": 2, "managers": {"Muhammadamin": 0, "Go'zal": 0, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 2}}, "Kasb_filtr": {"called": 5, "talked": 4, "managers": {"Muhammadamin": 0, "Go'zal": 0, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 4}}, "05.11 BotDeposit": {"called": 3, "talked": 2, "managers": {"Muhammadamin": 1, "Go'zal": 1, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 0}}, "BotReg": {"called": 1, "talked": 0, "managers": {"Muhammadamin": 0, "Go'zal": 0, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 0}}, "05.11 BotReg": {"called": 1, "talked": 1, "managers": {"Muhammadamin": 0, "Go'zal": 0, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 1}}}, "callbacks": {"Muhammadamin": {"talked": 0, "tried": 0, "none": 6, "done_no_call": 0}, "Go'zal": {"talked": 3, "tried": 0, "none": 8, "done_no_call": 0}, "Xurliqo": {"talked": 3, "tried": 0, "none": 19, "done_no_call": 15}, "Shaxina": {"talked": 0, "tried": 0, "none": 6, "done_no_call": 0}, "Nurangiz": {"talked": 1, "tried": 0, "none": 10, "done_no_call": 0}}, "pdf": true}, {"day": "2026-11-06", "assigned": 91, "worked": 83, "untouched": 8, "closed": 5, "won": 0, "calls": 343, "talk_min": 416, "recorded": 92, "script": 76, "managers": {"Muhammadamin": {"assigned": 13, "untouched": 7, "calls": 29, "script": 74}, "Go'zal": {"assigned": 20, "untouched": 0, "calls": 74, "script": 69}, "Xurliqo": {"assigned": 20, "untouched": 0, "calls": 80, "script": 73}, "Shaxina": {"assigned": 16, "untouched": 0, "calls": 61, "script": 80}, "Nurangiz": {"assigned": 22, "untouched": 1, "calls": 99, "script": 82}}, "sday": {"Muhammadamin": {"name": "Muhammadamin", "new": 13, "noreach": 9, "full": 0, "partial": 0, "sent": 1, "closed": 2}, "Go'zal": {"name": "Go'zal", "new": 20, "noreach": 6, "full": 0, "partial": 0, "sent": 0, "closed": 2}, "Xurliqo": {"name": "Xurliqo", "new": 20, "noreach": 12, "full": 0, "partial": 0, "sent": 0, "closed": 0}, "Shaxina": {"name": "Shaxina", "new": 16, "noreach": 5, "full": 0, "partial": 0, "sent": 0, "closed": 1}, "Nurangiz": {"name": "Nurangiz", "new": 22, "noreach": 16, "full": 1, "partial": 1, "sent": 0, "closed": 0}}, "seller": {"Muhammadamin": {"assigned": 13, "won": 0, "conv": 0.0, "dur": 50, "secs": 3014, "leads": 10, "attn": {"shift": "11:00–18:00", "came": "11:46", "left": "19:38", "late": 46, "early": 0, "gap": 0, "first": "11:56", "second": "11:56", "ok": false}, "leads_new": 4, "leads_old": 6, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"dur": 20000, "leads": 20000, "att": 20000}, "fine": 60000, "net": -60000, "calls": 29, "answered": 12, "missed": 10, "avg": 270, "longest": 788, "buckets": [4.0, 2.8, 8.6, 34.9]}, "Go'zal": {"assigned": 20, "won": 0, "conv": 0.0, "dur": 104, "secs": 6218, "leads": 22, "attn": {"shift": "14:00–19:00", "came": "14:10", "left": "18:50", "late": 10, "early": 10, "gap": 3, "first": "14:20", "second": "14:23", "ok": false}, "leads_new": 13, "leads_old": 9, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"leads": 20000, "att": 20000}, "fine": 40000, "net": -40000, "calls": 74, "answered": 24, "missed": 41, "avg": 269, "longest": 1256, "buckets": [1.9, 25.1, 12.4, 64.2]}, "Xurliqo": {"assigned": 20, "won": 0, "conv": 0.0, "dur": 98, "secs": 5887, "leads": 13, "attn": {"shift": "14:00–19:00", "came": "14:15", "left": "18:53", "late": 15, "early": 7, "gap": 3, "first": "14:25", "second": "14:28", "ok": false}, "leads_new": 7, "leads_old": 6, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"leads": 20000, "att": 20000}, "fine": 40000, "net": -40000, "calls": 80, "answered": 15, "missed": 51, "avg": 389, "longest": 2240, "buckets": [4.6, 6.1, 9.5, 77.8]}, "Shaxina": {"assigned": 16, "won": 0, "conv": 0.0, "dur": 90, "secs": 5375, "leads": 14, "attn": {"shift": "11:00–18:00", "came": "10:27", "left": "18:22", "late": 0, "early": 0, "gap": 2, "first": "10:37", "second": "10:39", "ok": true}, "leads_new": 9, "leads_old": 5, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "fines": {"dur": 20000, "leads": 20000}, "fine": 40000, "net": -30000, "calls": 61, "answered": 21, "missed": 28, "avg": 293, "longest": 891, "buckets": [2.4, 11.5, 19.2, 56.5]}, "Nurangiz": {"assigned": 22, "won": 0, "conv": 0.0, "dur": 75, "secs": 4489, "leads": 14, "attn": {"shift": "11:00–17:00", "came": "10:18", "left": "16:52", "late": 0, "early": 8, "gap": 6, "first": "10:28", "second": "10:34", "ok": false}, "leads_new": 4, "leads_old": 10, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"dur": 20000, "leads": 20000}, "fine": 40000, "net": -40000, "calls": 99, "answered": 21, "missed": 69, "avg": 233, "longest": 690, "buckets": [3.9, 9.2, 15.3, 46.4]}}, "tags": {"04.11 BotReg": {"called": 55, "talked": 30, "managers": {"Muhammadamin": 3, "Go'zal": 9, "Xurliqo": 7, "Shaxina": 4, "Nurangiz": 8}}, "05.11 BotReg": {"called": 31, "talked": 13, "managers": {"Muhammadamin": 3, "Go'zal": 5, "Xurliqo": 0, "Shaxina": 3, "Nurangiz": 3}}, "04.11 BotDeposit": {"called": 18, "talked": 10, "managers": {"Muhammadamin": 1, "Go'zal": 4, "Xurliqo": 3, "Shaxina": 1, "Nurangiz": 1}}, "Kasb_filtr": {"called": 15, "talked": 4, "managers": {"Muhammadamin": 0, "Go'zal": 2, "Xurliqo": 1, "Shaxina": 0, "Nurangiz": 1}}, "05.11 BotDeposit": {"called": 11, "talked": 9, "managers": {"Muhammadamin": 3, "Go'zal": 1, "Xurliqo": 0, "Shaxina": 4, "Nurangiz": 1}}, "06.11 BotReg": {"called": 6, "talked": 5, "managers": {"Muhammadamin": 0, "Go'zal": 1, "Xurliqo": 2, "Shaxina": 2, "Nurangiz": 0}}, "predzapis_lid": {"called": 4, "talked": 0, "managers": {"Muhammadamin": 0, "Go'zal": 0, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 0}}, "BotReg": {"called": 1, "talked": 0, "managers": {"Muhammadamin": 0, "Go'zal": 0, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 0}}, "06.11 BotDeposit": {"called": 1, "talked": 1, "managers": {"Muhammadamin": 0, "Go'zal": 1, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 0}}}, "callbacks": {"Muhammadamin": {"talked": 3, "tried": 0, "none": 6, "done_no_call": 0}, "Go'zal": {"talked": 5, "tried": 1, "none": 14, "done_no_call": 0}, "Xurliqo": {"talked": 7, "tried": 16, "none": 32, "done_no_call": 12}, "Shaxina": {"talked": 1, "tried": 0, "none": 7, "done_no_call": 0}, "Nurangiz": {"talked": 0, "tried": 2, "none": 13, "done_no_call": 0}}, "pdf": true}, {"day": "2026-11-07", "assigned": 125, "worked": 105, "untouched": 20, "closed": 7, "won": 0, "calls": 405, "talk_min": 574, "recorded": 126, "script": 67, "managers": {"Muhammadamin": {"assigned": 22, "untouched": 9, "calls": 73, "script": 53}, "Go'zal": {"assigned": 22, "untouched": 0, "calls": 133, "script": 72}, "Xurliqo": {"assigned": 36, "untouched": 0, "calls": 72, "script": 55}, "Shaxina": {"assigned": 23, "untouched": 3, "calls": 66, "script": 73}, "Nurangiz": {"assigned": 22, "untouched": 8, "calls": 61, "script": 72}}, "sday": {"Muhammadamin": {"name": "Muhammadamin", "new": 22, "noreach": 20, "full": 0, "partial": 0, "sent": 1, "closed": 2}, "Go'zal": {"name": "Go'zal", "new": 22, "noreach": 13, "full": 3, "partial": 7, "sent": 0, "closed": 2}, "Xurliqo": {"name": "Xurliqo", "new": 36, "noreach": 22, "full": 2, "partial": 3, "sent": 2, "closed": 0}, "Shaxina": {"name": "Shaxina", "new": 23, "noreach": 7, "full": 0, "partial": 1, "sent": 0, "closed": 2}, "Nurangiz": {"name": "Nurangiz", "new": 22, "noreach": 14, "full": 0, "partial": 3, "sent": 0, "closed": 1}}, "seller": {"Muhammadamin": {"assigned": 22, "won": 0, "conv": 0.0, "dur": 93, "secs": 5555, "leads": 14, "attn": {"shift": "11:00–18:00", "came": "09:58", "left": "19:32", "late": 0, "early": 0, "gap": 0, "first": "10:08", "second": "10:08", "ok": true}, "leads_new": 2, "leads_old": 12, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "fines": {"leads": 20000}, "fine": 20000, "net": -10000, "calls": 73, "answered": 19, "missed": 23, "avg": 322, "longest": 625, "buckets": [2.6, 4.7, 7.6, 77.7]}, "Go'zal": {"assigned": 22, "won": 0, "conv": 0.0, "dur": 147, "secs": 8815, "leads": 27, "attn": {"shift": "14:00–19:00", "came": "13:13", "left": "19:07", "late": 0, "early": 0, "gap": 32, "first": "13:23", "second": "13:55", "ok": true}, "leads_new": 8, "leads_old": 19, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "fines": {"leads": 20000}, "fine": 20000, "net": -10000, "calls": 133, "answered": 33, "missed": 88, "avg": 322, "longest": 1798, "buckets": [5.0, 19.9, 22.1, 99.9]}, "Xurliqo": {"assigned": 36, "won": 0, "conv": 0.0, "dur": 82, "secs": 4915, "leads": 18, "attn": {"shift": "14:00–19:00", "came": "12:48", "left": "19:11", "late": 0, "early": 0, "gap": 3, "first": "12:58", "second": "13:01", "ok": true}, "leads_new": 12, "leads_old": 6, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "fines": {"dur": 20000, "leads": 20000}, "fine": 40000, "net": -30000, "calls": 72, "answered": 22, "missed": 30, "avg": 242, "longest": 829, "buckets": [4.6, 14.8, 3.1, 59.4]}, "Shaxina": {"assigned": 23, "won": 0, "conv": 0.0, "dur": 162, "secs": 9740, "leads": 20, "attn": {"shift": "11:00–18:00", "came": "09:52", "left": "19:09", "late": 0, "early": 0, "gap": 14, "first": "10:02", "second": "10:16", "ok": true}, "leads_new": 14, "leads_old": 6, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "fines": {"leads": 20000}, "fine": 20000, "net": -10000, "calls": 66, "answered": 32, "missed": 25, "avg": 370, "longest": 1476, "buckets": [5.3, 9.6, 14.8, 132.7]}, "Nurangiz": {"assigned": 22, "won": 0, "conv": 0.0, "dur": 90, "secs": 5428, "leads": 17, "attn": {"shift": null, "ok": true, "off": true}, "leads_new": 7, "leads_old": 10, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {}, "fine": 0, "net": 0, "calls": 61, "answered": 19, "missed": 28, "avg": 299, "longest": 946, "buckets": [1.5, 15.8, 8.1, 65.1]}}, "tags": {"04.11 BotReg": {"called": 67, "talked": 39, "managers": {"Muhammadamin": 2, "Go'zal": 10, "Xurliqo": 11, "Shaxina": 10, "Nurangiz": 10}}, "BotReg": {"called": 34, "talked": 18, "managers": {"Muhammadamin": 2, "Go'zal": 7, "Xurliqo": 3, "Shaxina": 6, "Nurangiz": 0}}, "04.11 BotDeposit": {"called": 31, "talked": 15, "managers": {"Muhammadamin": 3, "Go'zal": 6, "Xurliqo": 2, "Shaxina": 1, "Nurangiz": 5}}, "05.11 BotReg": {"called": 14, "talked": 9, "managers": {"Muhammadamin": 4, "Go'zal": 1, "Xurliqo": 2, "Shaxina": 0, "Nurangiz": 2}}, "05.11 BotDeposit": {"called": 7, "talked": 5, "managers": {"Muhammadamin": 1, "Go'zal": 1, "Xurliqo": 0, "Shaxina": 3, "Nurangiz": 0}}, "Kasb_filtr": {"called": 4, "talked": 2, "managers": {"Muhammadamin": 1, "Go'zal": 2, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 0}}, "predzapis_lid": {"called": 1, "talked": 1, "managers": {"Muhammadamin": 0, "Go'zal": 1, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 0}}, "06.11 BotDeposit": {"called": 1, "talked": 1, "managers": {"Muhammadamin": 1, "Go'zal": 0, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 0}}}, "callbacks": {"Muhammadamin": {"talked": 4, "tried": 1, "none": 15, "done_no_call": 1}, "Go'zal": {"talked": 11, "tried": 3, "none": 18, "done_no_call": 0}, "Xurliqo": {"talked": 2, "tried": 2, "none": 57, "done_no_call": 22}, "Shaxina": {"talked": 5, "tried": 0, "none": 10, "done_no_call": 0}, "Nurangiz": {"talked": 0, "tried": 0, "none": 17, "done_no_call": 0}}, "pdf": true}, {"day": "2026-11-08", "assigned": 93, "worked": 84, "untouched": 9, "closed": 8, "won": 0, "calls": 297, "talk_min": 387, "recorded": 86, "script": 59, "managers": {"Muhammadamin": {"assigned": 0, "untouched": 0, "calls": 35, "script": 60}, "Go'zal": {"assigned": 36, "untouched": 7, "calls": 80, "script": 48}, "Xurliqo": {"assigned": 24, "untouched": 0, "calls": 56, "script": 62}, "Shaxina": {"assigned": 21, "untouched": 1, "calls": 30, "script": 54}, "Nurangiz": {"assigned": 12, "untouched": 1, "calls": 96, "script": 68}}, "sday": {"Muhammadamin": {"name": "Muhammadamin", "new": 0, "noreach": 0, "full": 0, "partial": 0, "sent": 0, "closed": 1}, "Go'zal": {"name": "Go'zal", "new": 36, "noreach": 24, "full": 0, "partial": 1, "sent": 0, "closed": 5}, "Xurliqo": {"name": "Xurliqo", "new": 24, "noreach": 14, "full": 1, "partial": 1, "sent": 1, "closed": 1}, "Shaxina": {"name": "Shaxina", "new": 21, "noreach": 11, "full": 0, "partial": 0, "sent": 0, "closed": 1}, "Nurangiz": {"name": "Nurangiz", "new": 12, "noreach": 5, "full": 0, "partial": 0, "sent": 1, "closed": 0}}, "seller": {"Muhammadamin": {"assigned": 0, "won": 0, "conv": 0, "dur": 11, "secs": 643, "leads": 3, "attn": {"shift": "11:00–18:00", "came": "12:34", "left": "16:48", "late": 94, "early": 72, "gap": 1, "first": "12:44", "second": "12:45", "ok": false}, "leads_new": 0, "leads_old": 3, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"dur": 20000, "leads": 20000, "att": 20000}, "fine": 60000, "net": -60000, "calls": 35, "answered": 4, "missed": 21, "avg": 158, "longest": 326, "buckets": [0.2, 5.1, 0.0, 5.4]}, "Go'zal": {"assigned": 36, "won": 0, "conv": 0.0, "dur": 90, "secs": 5378, "leads": 12, "attn": {"shift": "14:00–19:00", "came": "14:29", "left": "18:24", "late": 29, "early": 36, "gap": 22, "first": "14:39", "second": "15:01", "ok": false}, "leads_new": 11, "leads_old": 1, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"dur": 20000, "leads": 20000, "att": 20000}, "fine": 60000, "net": -60000, "calls": 80, "answered": 21, "missed": 50, "avg": 347, "longest": 1141, "buckets": [5.9, 6.2, 7.0, 70.5]}, "Xurliqo": {"assigned": 24, "won": 0, "conv": 0.0, "dur": 88, "secs": 5284, "leads": 12, "attn": {"shift": "14:00–19:00", "came": "12:53", "left": "18:18", "late": 0, "early": 42, "gap": 4, "first": "13:03", "second": "13:07", "ok": false}, "leads_new": 9, "leads_old": 3, "att": false, "ok": {"conv": false, "dur": false, "leads": false, "att": false}, "sum": 0, "fines": {"dur": 20000, "leads": 20000, "att": 20000}, "fine": 60000, "net": -60000, "calls": 56, "answered": 13, "missed": 31, "avg": 402, "longest": 2736, "buckets": [2.9, 9.6, 0.0, 75.6]}, "Shaxina": {"assigned": 21, "won": 0, "conv": 0.0, "dur": 126, "secs": 7564, "leads": 11, "attn": {"shift": "11:00–18:00", "came": "12:44", "left": "18:20", "late": 0, "early": 0, "gap": 8, "first": "12:54", "second": "13:02", "note": "telefoniya ishlamagan — vaqtida kelgan deb hisoblandi (foydalanuvchi, 09.11)", "ok": true}, "leads_new": 9, "leads_old": 2, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "fines": {"leads": 20000}, "fine": 20000, "net": -10000, "calls": 30, "answered": 14, "missed": 14, "avg": 580, "longest": 1377, "buckets": [3.0, 0.0, 0.0, 123.0]}, "Nurangiz": {"assigned": 12, "won": 0, "conv": 0.0, "dur": 72, "secs": 4345, "leads": 23, "attn": {"shift": "11:00–18:00", "came": "10:57", "left": "18:09", "late": 0, "early": 0, "gap": 32, "first": "11:07", "second": "11:39", "note": "telefoniya ishlamagan — vaqtida kelgan deb hisoblandi (foydalanuvchi, 09.11)", "ok": true}, "leads_new": 7, "leads_old": 16, "att": true, "ok": {"conv": false, "dur": false, "leads": false, "att": true}, "sum": 10000, "fines": {"dur": 20000, "leads": 20000}, "fine": 40000, "net": -30000, "calls": 96, "answered": 29, "missed": 61, "avg": 163, "longest": 606, "buckets": [5.0, 23.7, 16.4, 27.4]}}, "tags": {"04.11 BotReg": {"called": 90, "talked": 50, "managers": {"Muhammadamin": 2, "Go'zal": 11, "Xurliqo": 9, "Shaxina": 10, "Nurangiz": 18}}, "04.11 BotDeposit": {"called": 18, "talked": 3, "managers": {"Muhammadamin": 0, "Go'zal": 0, "Xurliqo": 1, "Shaxina": 0, "Nurangiz": 2}}, "05.11 BotReg": {"called": 7, "talked": 2, "managers": {"Muhammadamin": 0, "Go'zal": 1, "Xurliqo": 1, "Shaxina": 0, "Nurangiz": 0}}, "BotReg": {"called": 6, "talked": 2, "managers": {"Muhammadamin": 0, "Go'zal": 0, "Xurliqo": 1, "Shaxina": 0, "Nurangiz": 1}}, "05.11 BotDeposit": {"called": 2, "talked": 2, "managers": {"Muhammadamin": 1, "Go'zal": 0, "Xurliqo": 0, "Shaxina": 1, "Nurangiz": 0}}, "Kasb_filtr": {"called": 2, "talked": 2, "managers": {"Muhammadamin": 0, "Go'zal": 0, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 2}}, "06.11 BotReg": {"called": 1, "talked": 0, "managers": {"Muhammadamin": 0, "Go'zal": 0, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 0}}, "predzapis_lid": {"called": 0, "talked": 0, "managers": {"Muhammadamin": 0, "Go'zal": 0, "Xurliqo": 0, "Shaxina": 0, "Nurangiz": 0}}}, "callbacks": {"Muhammadamin": {"talked": 2, "tried": 3, "none": 14, "done_no_call": 0}, "Go'zal": {"talked": 2, "tried": 2, "none": 29, "done_no_call": 0}, "Xurliqo": {"talked": 3, "tried": 11, "none": 47, "done_no_call": 43}, "Shaxina": {"talked": 3, "tried": 0, "none": 15, "done_no_call": 0}, "Nurangiz": {"talked": 1, "tried": 0, "none": 23, "done_no_call": 0}}, "pdf": true}], "built": "09.11.2026 02:59"};
+const MGR = ["Muhammadamin","Go'zal","Xurliqo","Shaxina","Nurangiz"];
+const OY=["yanvar","fevral","mart","aprel","may","iyun","iyul","avgust","sentabr","oktabr","noyabr","dekabr"];
+const HAFTA=["yakshanba","dushanba","seshanba","chorshanba","payshanba","juma","shanba"];
+const el=(t,c,x)=>{const e=document.createElement(t); if(c) e.className=c; if(x!=null) e.textContent=x; return e;};
+const NS="http://www.w3.org/2000/svg"; const sv=(t,a)=>{const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); return e;};
+const lv=v=>v==null?'lv0':v>=75?'lv3':v>=50?'lv2':'lv1';
+const fmt=d=>{const x=new Date(d+'T00:00:00'); return `${x.getDate()}-${OY[x.getMonth()]}`;};
+const wd=d=>HAFTA[new Date(d+'T00:00:00').getDay()];
+const days=DATA.days; const link=d=>`hisobotlar/${d}.html`;
 
-const PATOK = '24.10.2026';
-const API = 'https://script.google.com/macros/s/AKfycbzKZhTdO0zOsLW8rmZBwoHYuHOggU4LNReL8BSJZEUKSqVrFm8It8jouAx5Ahx53PX5uw/exec';
-const KEY = new URLSearchParams(location.hash.slice(1)).get('k') || new URLSearchParams(location.search).get('k') || '';   // maxfiy kalit (doGet shablonidan), har bir so'rovda serverga yuboriladi
-const COLORS = ['#13937f', '#2563eb', '#d4991f', '#8b5cf6', '#5fa30f', '#0891b2'];
-let state = { p: 'all', d: '', l: 'bot' }, busy = false, seq = 0;
-const $ = (id) => document.getElementById(id);
-const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-const num = (n) => Math.round(n).toLocaleString('ru-RU');
-const som = (n) => num(n) + " so'm";
-const pct = (p) => p.toLocaleString('ru-RU') + '%';
-const hms = (s) => { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return `${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`; };
-const ratio = (v, base) => base ? Math.round(v / base * 1000) / 10 : null;
-const share = (v, base) => { const r = ratio(v, base); return r == null ? '—' : pct(r); };
-// Holat belgisi: [chegara "yaxshi", chegara "me'yorda"], yuqori qiymat yaxshi bo'lsa up=true
-const grade = (val, good, ok, up, words) => {
-  if (val == null) return null;
-  const g = up ? (val >= good ? 0 : val >= ok ? 1 : 2) : (val <= good ? 0 : val <= ok ? 1 : 2);
-  return [['ok', 'mid', 'low'][g], words[g]];
-};
+const L=document.getElementById('latest');
+if(days.length){const k=days[days.length-1]; L.href=link(k.day);
+  const t=el('div','t'); t.append(el('span',null,'Oxirgi hisobot'),el('b',null,'Ochish →')); L.append(t, el('h2',null,`${fmt(k.day)}, ${wd(k.day)}`));
+  const g=el('div','lk'); [["Berilgan",k.assigned,""],["Tegilmagan",k.untouched,"sun"],["Sotuv",k.won,""],["Skript",k.script!=null?k.script+'%':'—',"sun"]]
+    .forEach(([a,b,c])=>{const d=el('div',c); d.append(el('b','num',b),el('span',null,a)); g.append(d);}); L.append(g);}
+else { L.append(el('h2',null,"Hali hisobot yo'q")); }
 
-function kpiLine(sum, tiers) {
-  let i = 0;
-  while (i + 1 < tiers.length && sum >= tiers[i + 1][0]) i++;
-  const p = tiers[i][1], next = tiers[i + 1], frag = document.createDocumentFragment();
-  if (p) { frag.append(`KPI ${pct(p)} → `); frag.append(el('b', '', som(sum * p / 100))); } else frag.append('KPI 0%');
-  frag.append(next ? ` · ${pct(next[1])} gacha ${som(next[0] - sum)} qoldi` : " · eng yuqori pog'ona");
-  return frag;
-}
+(function(){
+  const box=document.getElementById('chart'); if(!days.length){box.append(el('p','empty',"Birinchi hisobot bugun 21:00 da tayyor bo'ladi.")); return;}
+  const W=Math.max(560,days.length*64+90), H=260, L0=40, R0=44, T0=16, B0=34;
+  const maxA=Math.max(10,...days.map(d=>d.assigned)); const bw=Math.min(36,(W-L0-R0)/days.length*0.55);
+  const X=i=>L0+(i+.5)*(W-L0-R0)/days.length, Y=v=>T0+(H-T0-B0)*(1-v/maxA), YS=v=>T0+(H-T0-B0)*(1-v/100);
+  const s=sv('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%'});
+  [0,.25,.5,.75,1].forEach(f=>{const y=T0+(H-T0-B0)*f; s.append(sv('line',{x1:L0,x2:W-R0,y1:y,y2:y,stroke:'var(--line)'}));
+    const a=sv('text',{x:L0-8,y:y+4,'text-anchor':'end'}); a.textContent=Math.round(maxA*(1-f)); s.append(a);
+    const b=sv('text',{x:W-R0+8,y:y+4}); b.textContent=Math.round(100*(1-f))+'%'; s.append(b);});
+  days.forEach((d,i)=>{const x=X(i)-bw/2;
+    s.append(sv('rect',{x,y:Y(d.assigned),width:bw,height:Y(0)-Y(d.assigned),rx:5,fill:'var(--grey)'}));
+    s.append(sv('rect',{x,y:Y(d.worked),width:bw,height:Y(0)-Y(d.worked),rx:5,fill:'var(--green)'}));
+    if(d.won) s.append(sv('circle',{cx:X(i),cy:Y(d.assigned)-10,r:5,fill:'var(--blue)'}));
+    const t=sv('text',{x:X(i),y:H-12,'text-anchor':'middle'}); t.textContent=fmt(d.day).replace(/-.*/,'')+' '+fmt(d.day).split('-')[1].slice(0,3); s.append(t);
+    s.append(sv('rect',{x:X(i)-(W-L0-R0)/days.length/2,y:T0,width:(W-L0-R0)/days.length,height:H-T0-B0,fill:'transparent','data-i':i,style:'cursor:pointer'}));});
+  const pts=days.map((d,i)=>d.script!=null?[X(i),YS(d.script)]:null).filter(Boolean);
+  if(pts.length>1) s.append(sv('polyline',{points:pts.map(p=>p.join(',')).join(' '),fill:'none',stroke:'var(--sun)','stroke-width':2.5,'stroke-linejoin':'round','stroke-linecap':'round'}));
+  pts.forEach(p=>s.append(sv('circle',{cx:p[0],cy:p[1],r:4.5,fill:'var(--sun)',stroke:'var(--panel)','stroke-width':2})));
+  box.append(s);
+  const tip=el('div','tip'); tip.hidden=true; box.append(tip);
+  box.addEventListener('mousemove',e=>{const i=e.target.getAttribute&&e.target.getAttribute('data-i'); if(i==null){tip.hidden=true;return;}
+    const d=days[i]; tip.textContent=''; tip.append(el('div','s',`${fmt(d.day)}, ${wd(d.day)}`),el('div',null,`Berilgan ${d.assigned} · ishlangan ${d.worked} · tegilmagan ${d.untouched}`),el('div',null,`Yopilgan ${d.closed} · sotuv ${d.won}`),el('div',null,`Qo'ng'iroq ${d.calls} · skript ${d.script!=null?d.script+'%':'—'}`));
+    tip.hidden=false; const b=box.getBoundingClientRect(); let lx=e.clientX-b.left+box.scrollLeft+14; if(e.clientX-b.left+260>b.width) lx-=270; tip.style.left=lx+'px'; tip.style.top=(e.clientY-b.top+10)+'px';});
+  box.addEventListener('mouseleave',()=>tip.hidden=true);
+  box.addEventListener('click',e=>{const i=e.target.getAttribute&&e.target.getAttribute('data-i'); if(i!=null) location.href=link(days[i].day);});
+})();
 
-function render(raw) {
-  const d = JSON.parse(raw), k = d.kpi;
-  const range = d.from === d.to ? d.from.split('-').reverse().join('.') : `${d.from.split('-').reverse().join('.')} — ${d.to.split('-').reverse().join('.')}`;
-  $('sub').textContent = `${d.label} · ${range} · BotReg / BotDeposit teglari bor lidlar · ma'lumotlar Odoo'dan`;
-  $('upd').textContent = 'Jonli · ' + d.updated.slice(11);
-  $('live').classList.remove('err');
+const T=document.getElementById('days');
+days.slice().reverse().forEach(d=>{const tr=el('tr'); const a=el('a',null,`${fmt(d.day)}`); a.href=link(d.day);
+  const c0=el('td'); c0.append(a, el('span',null,' · '+wd(d.day)));
+  const sc=el('td'); sc.append(el('span','pill '+lv(d.script),d.script!=null?d.script+'%':'—'));
+  const pc=el('td'); if(d.pdf){const pa=el('a',null,'PDF ↓'); pa.href=`hisobotlar/${d.day}.pdf`; pc.append(pa);} else pc.textContent='—';
+  tr.append(c0,...[d.assigned,d.worked,d.untouched,d.closed,d.won,d.calls,d.talk_min].map(v=>el('td','r num',v)),sc,pc);
+  tr.addEventListener('click',e=>{if(e.target.tagName!=='A') location.href=link(d.day);}); T.append(tr);});
 
-  const hero = [
-    ['wallet', 'Jami tushum', k.revenueKnown ? num(k.revenue) : '—', "so'm", !k.revenueKnown ? "Bu davr uchun tushum tarixi hali yo'q" : k.revenueApprox ? `Taxminiy · shu davrda yangilangan lidlar bo'yicha` : `Menejerlar + avtoto'lov · ${d.label.toLowerCase()}`],
-    ['users', 'Yangi lidlar', num(k.newLeads), 'ta', d.period === 'all' ? 'BotReg / BotDeposit teglari bor lidlar' : `Patok bo'yicha jami: ${num(k.totalLeads)} ta lid`],
-    ['check', "To'liq to'lov", num(d.pay ? d.pay.full.n : k.full), 'ta', `Konversiya: ${share(k.full, k.newLeads)} yangi lidlardan`, d.pay && d.pay.full],
-    ['pct', "Qisman to'lov", d.pay ? num(d.pay.part.n) : '—', 'ta', '', d.pay && d.pay.part],
-  ];
-  $('hero').replaceChildren(...hero.map(([ic, t, v, u, n, p]) => {
-    const c = el('div', 'hc'), h = el('div', 'head'), ico = el('div', 'ico'); ico.innerHTML = svg(ic);
-    const box = el('div'); box.append(el('div', 't', t)); const vv = el('div', 'v', v); if (u) vv.append(el('small', '', u)); box.append(vv);
-    h.append(ico, box); c.append(h);
-    if (p) {   // tariflar kesimida: nomi | soni · summasi
-      const tl = el('div', 'tl');
-      p.rows.filter((r) => r.n || r.name !== 'Belgilanmagan').forEach((r) => {
-        const x = el('div'); x.append(el('span', '', r.name === 'STANDART +' ? 'Standart+' : r.name.charAt(0) + r.name.slice(1).toLowerCase()), `${num(r.n)} ta · ${num(r.sum)}`); tl.append(x);
-      });
-      c.append(tl);
-    } else c.append(el('div', 'n', n));
-    return c;
-  }));
-
-  const talkRate = ratio(k.talked, k.out), avg = k.talked ? k.sec / k.talked : 0;
-  const metrics = [
-    ['out', 'Telefon qilingan', num(k.out), `${share(k.out, k.newLeads)} · yangi lidlarga nisbatan`],
-    ['talk', 'Gaplashilgan', num(k.talked), `${share(k.talked, k.newLeads)} · yangi lidlarga nisbatan`],
-    ['miss', "Ko'tarilmagan qo'ng'iroqlar", num(k.missed), `${share(k.missed, k.newLeads)} · yangi lidlarga nisbatan`],
-    ['x', 'Sifatsiz lidlar', num(k.lost), `${share(k.lost, k.newLeads)} · yopilgan (lost) lidlar`],
-    ['pct', 'Gaplashish ulushi', talkRate == null ? '—' : pct(talkRate), null,
-      grade(talkRate, 45, 30, true, ["Yaxshi — mijozlar ko'taryapti", "Me'yorda", "Past — ko'p qo'ng'iroq javobsiz"])],
-    ['timer', "O'rtacha suhbat", k.talked ? hms(avg) : '—', null,
-      k.talked ? grade(avg / 60, 4, 2, true, ["Yaxshi — chuqur suhbat", "Me'yorda", "Qisqa — taqdimot yetmayapti"]) : null],
-    ['refund', 'Vozvrat qilindi', num(k.refund || 0) + ' ta', som(k.refundSum || 0) + ' qaytarilgan'],
-    ['clock', 'Calltime', hms(k.sec), `${num(k.talked)} ta suhbat · soat:daqiqa:soniya`],
-  ];
-  $('mgrid').replaceChildren(...metrics.map(([ic, t, v, n, tag]) => {
-    const m = el('div', 'm'), h = el('div', 'mh'), ib = el('div', 'ib'); ib.innerHTML = svg(ic);
-    h.append(ib, el('div', 't', t)); m.append(h, el('div', 'v', v));
-    if (tag) m.append(el('span', 'tag ' + tag[0], tag[1])); else if (n) m.append(el('div', 'n', n));
-    return m;
-  }));
-
-  $('revnote').textContent = (d.period === 'all' ? 'Patokning barcha kunlari' : d.label) + " · Har bir xodimning jami tushumi, so'm";
-  $('revwarn').replaceChildren(...(k.revenueApprox ? [el('div', 'warn', "Taxminiy: bu davr uchun kunlik tarix hali yo'q (06.11.2026 dan yig'ilmoqda), shuning uchun shu davrda yangilangan lidlardagi summa ko'rsatilgan.")] : []));
-  const max = Math.max(1, ...d.revenue.map((r) => r.sum));
-  $('rev').replaceChildren(...d.revenue.map((r, i) => {
-    const x = el('div', r.auto ? 'rv auto' : 'rv');
-    const top = el('div', 'top'); top.append(el('span', 'nm', r.auto ? '🤖 ' + r.name : r.name), el('span', 'sm', som(r.sum)));
-    const bar = el('div', 'bar'), f = el('div', 'fill');
-    f.style.width = (r.sum / max * 100) + '%'; f.style.background = r.auto ? '#94a3b8' : COLORS[i % COLORS.length];
-    bar.append(f); x.append(top, bar);
-    if (!r.auto && d.period === 'all') { const kl = el('div', 'kl'); kl.append(kpiLine(r.sum, d.tiers)); x.append(kl); }
-    return x;
-  }));
-  $('revsum').textContent = k.revenueKnown ? som(k.revenue) : '—';
-
-  // Voronka: ko'kning ochdan to'qqa o'tuvchi tuslari
-  const FA = d.funnel || [], F = FA.filter((s) => !s.refund), RF = FA.filter((s) => s.refund), top = F.length ? F[0].reached : 0, shade = (i) => `hsl(213, 78%, ${68 - i / Math.max(1, F.length - 1) * 30}%)`;
-  const fn = [];
-  F.forEach((s, i) => {
-    if (i) { const c = el('div', 'fc'); c.append(el('span', '', s.reached > F[i - 1].reached ? `+${num(s.reached - F[i - 1].reached)} oldingi kunlardan` : '↓ ' + share(s.reached, F[i - 1].reached))); fn.push(c); }
-    const r = el('div', 'fr'), nm = el('div', 'nm', s.name);
-    nm.append(el('small', '', s.now ? `hozir shu etapda: ${num(s.now)}` + (s.sum ? ` · ${som(s.sum)}` : '') : ''));
-    const tr = el('div', 'tr'), bx = el('div', 'bx', num(s.reached));
-    bx.style.width = (top ? Math.max(s.reached / top * 100, 0) : 0) + '%'; bx.style.background = s.reached ? shade(i) : '#cbd5e1';
-    tr.append(bx);
-    const st = el('div', 'st'); st.append(el('b', '', share(s.reached, top)), ' jamidan');
-    if (s.lost) { st.append(el('br')); st.append(el('span', 'ls', `yopilgan: ${num(s.lost)}`)); }
-    r.append(nm, tr, st); fn.push(r);
-  });
-  RF.forEach((s) => {
-    const r = el('div', 'fr rf'), nm = el('div', 'nm', s.name);
-    nm.append(el('small', '', "shu davrda vozvrat qilinganlar"));
-    const tr = el('div', 'tr'), bx = el('div', 'bx', num(s.reached));
-    bx.style.width = (top ? Math.max(s.reached / top * 100, 0) : 0) + '%'; bx.style.background = s.reached ? '#dc2626' : '#cbd5e1';
-    tr.append(bx);
-    const st = el('div', 'st'); st.append(el('b', '', `${num(s.reached)} ta`), el('br'), el('span', 'rs', som(s.sum || 0)));
-    r.append(nm, tr, st); fn.push(r);
-  });
-  $('fn').replaceChildren(...fn);
-  const lostAll = F.reduce((a, s) => a + s.lost, 0), last = F.length ? F[F.length - 1].reached : 0;
-  const fs = el('div'); fs.append(`${F.length ? F[0].name : ''} → ${F.length ? F[F.length - 1].name : ''}: `, el('b', '', share(last, top)));
-  const fl = el('div'); fl.append('Yopilgan (lost) lidlar: ', el('b', 'r', `${num(lostAll)} ta`), ` · ${share(lostAll, top)}`);
-  $('fsum').replaceChildren(fs, fl);
-  renderRegions(d.regions);
-
-  const rows = d.managers.slice().sort((a, b) => b.sec - a.sec);
-  const cells = (m) => [m.name, num(m.leads), num(m.out), num(m.talked), hms(m.sec), num(m.full)];
-  $('tbody').replaceChildren(...rows.map((m) => { const tr = el('tr'); cells(m).forEach((c) => tr.append(el('td', '', c))); return tr; }));
-  const tot = rows.reduce((a, m) => ({ name: 'Jami', leads: a.leads + m.leads, out: a.out + m.out, talked: a.talked + m.talked, sec: a.sec + m.sec, full: a.full + m.full }),
-    { leads: 0, out: 0, talked: 0, sec: 0, full: 0 });
-  const ft = el('tr'); cells(tot).forEach((c) => ft.append(el('td', '', c))); $('tfoot').replaceChildren(ft);
-}
-
-// Mijozlar hududi: O'zbekiston xaritasi (viloyat chegaralari Natural Earth/Highcharts, bir marta yuklanadi) + reyting
-const RG_KEY = {'toshkent shahri': 'TC', 'toshkent viloyati': 'TV', 'andijon': 'uz-an', 'samarqand': 'uz-sa', 'fargona': 'uz-fa',
-  'namangan': 'uz-ng', 'qashqadaryo': 'uz-qa', 'jizzax': 'uz-ji', 'surxondaryo': 'uz-su', 'sirdaryo': 'uz-si', 'buxoro': 'uz-bu',
-  'nukus': 'uz-qr', 'qoraqalpogiston': 'uz-qr', 'navoiy': 'uz-nw', 'xorazm': 'uz-kh'};
-const RG_NAME = {'TC': 'Toshkent sh.', 'TV': 'Toshkent vil.', 'uz-an': 'Andijon', 'uz-sa': 'Samarqand', 'uz-fa': "Farg'ona", 'uz-ng': 'Namangan',
-  'uz-qa': 'Qashqadaryo', 'uz-ji': 'Jizzax', 'uz-su': 'Surxondaryo', 'uz-si': 'Sirdaryo', 'uz-bu': 'Buxoro', 'uz-qr': "Qoraqalpog'iston",
-  'uz-nw': 'Navoiy', 'uz-kh': 'Xorazm'};
-const RG_RAMP = ['#E6F1FB', '#B5D4F4', '#85B7EB', '#378ADD', '#185FA5', '#0C447C'];
-let rgGeo = null, rgData = null;
-const rgNorm = (s) => s.toLowerCase().replace(/[\u2018\u2019'`ʻʼ]/g, '').trim();
-function renderRegions(R) {
-  if (!R) return;
-  const by = {};
-  R.rows.forEach((r) => { const k = RG_KEY[rgNorm(r.name)] || r.name; const x = by[k] || (by[k] = {key: k, name: RG_NAME[k] || r.name, n: 0, part: 0, full: 0, paid: 0}); x.n += r.n; x.part += r.part || 0; x.full += r.full || 0; x.paid = x.part + x.full; });
-  Object.keys(RG_NAME).forEach((k) => { if (!by[k]) by[k] = {key: k, name: RG_NAME[k], n: 0, part: 0, full: 0, paid: 0}; });
-  const rows = Object.values(by).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name)), max = Math.max(1, ...rows.map((r) => r.n));
-  rgData = {by, max};
-  const known = R.total - R.none, f = $('rgfill');
-  f.replaceChildren(); f.append('Manzil kiritilgan: ', el('b', '', `${num(known)} / ${num(R.total)}`), ` (${share(known, R.total)})`);
-  const bar = el('div', 'rgbar'), bi = el('i'); bi.style.width = (R.total ? known / R.total * 100 : 0) + '%'; bar.append(bi); f.append(bar);
-  const lg = $('rgleg'); lg.replaceChildren('kam', ...RG_RAMP.map((c) => { const s = el('span'); s.style.background = c; return s; }), "ko'p");
-  $('rgrank').replaceChildren(...rows.filter((r) => r.n).map((r) => rgRow(r.name, r.n, r, max, false)), rgRow('Manzili kiritilmagan', R.none, null, Math.max(max, R.none), true));
-  if (!rows.some((r) => r.n)) $('rgrank').prepend(el('div', 'pnote', "Bu davrda hududi kiritilgan lid yo'q"));
-  if (rgGeo) rgPaint(); else if (!rgGeo && window.d3) rgLoad();
-}
-function rgRow(name, n, p, max, none) {
-  const r = el('div', none ? 'rr none' : 'rr'), tr = el('div', 'tr'), i = el('i'); i.style.width = (n / max * 100) + '%'; tr.append(i);
-  const v = el('div', 'v', `${num(n)} lid`), pp = el('div', 'pp');
-  if (p) { pp.append(el('span', 'qp' + (p.part ? '' : ' z'), `qisman ${num(p.part)}`), el('span', 'tp' + (p.full ? '' : ' z'), `to'liq ${num(p.full)}`)); }
-  r.append(el('div', '', name), tr, v, pp); return r;
-}
-function rgColor(n) { if (!n) return '#e5e7eb'; return RG_RAMP[Math.min(RG_RAMP.length - 1, Math.floor(n / rgData.max * (RG_RAMP.length - 0.01)))]; }
-function rgLoad() {
-  rgGeo = 'loading';
-  fetch('https://cdn.jsdelivr.net/npm/@highcharts/map-collection@2.3.0/countries/uz/uz-all.geo.json').then((x) => x.json()).then((g) => {
-    const pr = d3.geoIdentity().reflectY(true).fitSize([520, 330], g), path = d3.geoPath(pr);
-    const t = g.features.filter((f) => ['uz-tk', 'uz-ta'].includes(f.properties['hc-key'])).sort((a, b) => path.area(a) - path.area(b));
-    t[0].properties.k = 'TC'; t[1].properties.k = 'TV';
-    g.features.forEach((f) => { if (!f.properties.k) f.properties.k = f.properties['hc-key']; });
-    rgGeo = {g, path}; rgPaint();
-  }).catch(() => { rgGeo = null; $('rginfo').textContent = 'Xarita yuklanmadi'; });
-}
-function rgInfo(k) {
-  const r = rgData.by[k] || {name: RG_NAME[k], n: 0, part: 0, full: 0}, b = $('rginfo'), pp = el('div', 'pp');
-  pp.append(el('span', 'qp' + (r.part ? '' : ' z'), `qisman ${num(r.part)}`), el('span', 'tp' + (r.full ? '' : ' z'), `to'liq ${num(r.full)}`));
-  b.replaceChildren(el('b', '', r.name), el('div', 'big', num(r.n)), 'lid', pp);
-}
-function rgPaint() {
-  if (!rgGeo || rgGeo === 'loading' || !rgData) return;
-  const svg = d3.select('#rgmap'), {g, path} = rgGeo;
-  svg.selectAll('path').data(g.features).join('path').attr('d', path).attr('fill', (f) => rgColor((rgData.by[f.properties.k] || {}).n || 0))
-    .on('mouseenter', function (e, f) { d3.select(this).classed('on', true).raise(); rgInfo(f.properties.k); })
-    .on('mouseleave', function () { d3.select(this).classed('on', false); });
-  svg.selectAll('g.lb').remove();
-  const lb = svg.append('g').attr('class', 'lb').attr('pointer-events', 'none');
-  g.features.forEach((f) => {
-    const r = rgData.by[f.properties.k] || {n: 0, paid: 0}, c = path.centroid(f), big = path.area(f) > 900;
-    if (big && r.n) lb.append('text').attr('x', c[0]).attr('y', c[1] + 4).attr('text-anchor', 'middle').attr('font-size', 13).attr('font-weight', 700)
-      .attr('fill', r.n / rgData.max > 0.5 ? '#fff' : '#0C447C').text(r.n);
-    if (r.paid) lb.append('circle').attr('cx', c[0] + (big ? 14 : 0)).attr('cy', c[1] - (big ? 12 : 0)).attr('r', 3 + Math.min(6, r.paid)).attr('fill', '#639922').attr('stroke', '#fff');
-  });
-}
-
-function fail(e) {
-  $('upd').textContent = "Ma'lumot olinmadi: " + (e && e.message || e);
-  $('live').classList.add('err');
-}
-
-// seq: davr almashganda eski javob yangisining ustiga chizilmasin
-function load() {
-  if (busy) return; busy = true;
-  const my = ++seq;
-  const q = new URLSearchParams({api: 1, k: KEY, period: state.p, date: state.d || ''});
-  fetch(API + '?' + q, {credentials: 'omit'}).then((x) => x.text()).then((r) => {
-    busy = false; if (my !== seq) return;
-    const err = JSON.parse(r).error;
-    if (err) fail(err); else render(r);
-  }).catch((e) => { busy = false; if (my === seq) fail(e); });
-}
-
-$('tabs').addEventListener('click', (e) => {
-  const b = e.target.closest('button'); if (!b) return;
-  state = { p: b.dataset.p, d: '', l: state.l }; $('date').value = '';
-  [...$('tabs').querySelectorAll('button')].forEach((x) => x.classList.toggle('on', x === b));
-  busy = false; load();
-});
-$('date').addEventListener('change', (e) => {
-  if (!e.target.value) return;
-  state = { p: 'day', d: e.target.value, l: state.l };
-  [...$('tabs').querySelectorAll('button')].forEach((x) => x.classList.remove('on'));
-  busy = false; load();
-});
-load();
-setInterval(load, 30000);
+const H=document.getElementById('heat');
+const hr=el('tr'); hr.append(el('th',null,'')); days.forEach(d=>hr.append(el('th',null,fmt(d.day)))); H.append(hr);
+MGR.forEach(m=>{const tr=el('tr'); tr.append(el('td','nm',m)); days.forEach(d=>{const v=(d.managers[m]||{}).script; tr.append(el('td',lv(v),v!=null?v+'%':'—'));}); H.append(tr);});
+document.getElementById('foot').textContent=`Oxirgi yangilanish: ${DATA.built}. Ma'lumot manbai: Odoo CRM va Telefon. Skript bali — yozuvlarni avtomatik matnga aylantirib baholangan, taxminiy.`;
 </script>
 </body>
 </html>
