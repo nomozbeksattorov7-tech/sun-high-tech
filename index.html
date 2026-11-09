@@ -115,6 +115,15 @@ tfoot td { font-weight:750; border-bottom:0; }
 .rginfo .big { font-size:28px; font-weight:800; color:#185FA5; }
 .rgbar { height:7px; border-radius:4px; background:var(--line); margin-top:8px; overflow:hidden; } .rgbar i { display:block; height:100%; background:#378ADD; }
 .rgleg { display:flex; gap:4px; align-items:center; font-size:12px; color:var(--muted); } .rgleg span { width:24px; height:9px; border-radius:2px; }
+.rgct { margin-top:10px; padding-top:8px; border-top:1px solid var(--line); display:grid; gap:4px; font-size:13.5px; }
+.rgct .h { font-size:12px; font-weight:650; text-transform:uppercase; letter-spacing:.04em; }
+.rgct div { display:flex; justify-content:space-between; gap:8px; } .rgct span { color:var(--fg); } .rgct .z, .rgct .z span { color:var(--muted); }
+.rr.tg { cursor:pointer; } .rr.tg:hover { background:var(--track); }
+.rr .cv { display:inline-block; width:14px; color:var(--muted); font-weight:700; transition:transform .2s; }
+.rgg.open .cv { transform:rotate(90deg); }
+.rsub { display:none; padding-left:22px; } .rgg.open .rsub { display:block; }
+.rsub .rr { font-size:13.5px; padding:4px 0; border-top:1px dashed var(--line); grid-template-columns:128px minmax(0,1fr) 70px 190px; }
+.rsub .rr .tr { height:8px; } .rsub .rr .tr i { background:#85B7EB; }
 .rgh { margin:22px 0 8px; font-size:16px; }
 .pp { display:flex; gap:6px; justify-content:flex-end; } .rginfo .pp { justify-content:flex-start; margin-top:8px; }
 .pp span { font-size:12.5px; font-weight:650; padding:2px 8px; border-radius:7px; white-space:nowrap; }
@@ -123,7 +132,7 @@ tfoot td { font-weight:750; border-bottom:0; }
 .rr .tr { height:12px; border-radius:6px; background:var(--line); overflow:hidden; } .rr .tr i { display:block; height:100%; background:#378ADD; border-radius:6px; }
 .rr .v { text-align:right; font-variant-numeric:tabular-nums; } .rr .v em { font-style:normal; color:#3B6D11; font-weight:650; }
 .rr.none { color:var(--muted); } .rr.none .tr i { background:#cbd5e1; }
-@media (max-width: 800px) { .rg { grid-template-columns:minmax(0,1fr); } .rr { grid-template-columns:110px minmax(0,1fr) 60px; gap:6px 8px; font-size:13.5px; } .rr .pp { grid-column:1 / -1; justify-content:flex-start; } }
+@media (max-width: 800px) { .rg { grid-template-columns:minmax(0,1fr); } .rr { grid-template-columns:110px minmax(0,1fr) 60px; gap:6px 8px; font-size:13.5px; } .rr .pp { grid-column:1 / -1; justify-content:flex-start; } .rsub .rr { grid-template-columns:96px minmax(0,1fr) 60px; } }
 .fc { display:grid; grid-template-columns:200px minmax(0,1fr) 190px; gap:18px; }
 .fc span { grid-column:2; justify-self:center; font-size:12.5px; font-weight:650; color:var(--ifg); background:var(--ibg);
   padding:2px 10px; border-radius:999px; font-variant-numeric:tabular-nums; }
@@ -367,7 +376,7 @@ const rgNorm = (s) => s.toLowerCase().replace(/[\u2018\u2019'`ʻʼ]/g, '').trim(
 function renderRegions(R) {
   if (!R) return;
   const by = {};
-  R.rows.forEach((r) => { const k = RG_KEY[rgNorm(r.name)] || r.name; const x = by[k] || (by[k] = {key: k, name: RG_NAME[k] || r.name, n: 0, part: 0, full: 0, paid: 0}); x.n += r.n; x.part += r.part || 0; x.full += r.full || 0; x.paid = x.part + x.full; });
+  R.rows.forEach((r) => { const k = RG_KEY[rgNorm(r.name)] || r.name; const x = by[k] || (by[k] = {key: k, name: RG_NAME[k] || r.name, n: 0, part: 0, full: 0, paid: 0}); x.cities = (x.cities || []).concat(r.cities || []); x.n += r.n; x.part += r.part || 0; x.full += r.full || 0; x.paid = x.part + x.full; });
   Object.keys(RG_NAME).forEach((k) => { if (!by[k]) by[k] = {key: k, name: RG_NAME[k], n: 0, part: 0, full: 0, paid: 0}; });
   const rows = Object.values(by).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name)), max = Math.max(1, ...rows.map((r) => r.n));
   rgData = {by, max};
@@ -375,9 +384,19 @@ function renderRegions(R) {
   f.replaceChildren(); f.append('Manzil kiritilgan: ', el('b', '', `${num(known)} / ${num(R.total)}`), ` (${share(known, R.total)})`);
   const bar = el('div', 'rgbar'), bi = el('i'); bi.style.width = (R.total ? known / R.total * 100 : 0) + '%'; bar.append(bi); f.append(bar);
   const lg = $('rgleg'); lg.replaceChildren('kam', ...RG_RAMP.map((c) => { const s = el('span'); s.style.background = c; return s; }), "ko'p");
-  $('rgrank').replaceChildren(...rows.filter((r) => r.n).map((r) => rgRow(r.name, r.n, r, max, false)), rgRow('Manzili kiritilmagan', R.none, null, Math.max(max, R.none), true));
+  $('rgrank').replaceChildren(...rows.filter((r) => r.n).map((r) => rgGroup(r, max)), rgRow('Manzili kiritilmagan', R.none, null, Math.max(max, R.none), true));
   if (!rows.some((r) => r.n)) $('rgrank').prepend(el('div', 'pnote', "Bu davrda hududi kiritilgan to'lovli lid yo'q"));
   if (rgGeo) rgPaint(); else if (!rgGeo && window.d3) rgLoad();
+}
+function rgGroup(r, max) {
+  // Viloyat qatori bosilganda ostida shahar/tumanlar ochiladi
+  const w = el('div', 'rgg'), h = rgRow(r.name, r.n, r, max, false), sub = el('div', 'rsub');
+  const cs = r.cities || [], rest = r.n - cs.reduce((a, c) => a + c.n, 0);
+  cs.forEach((c) => sub.append(rgRow(c.name, c.n, c, r.n, false)));
+  if (rest > 0) sub.append(rgRow('Tuman kiritilmagan', rest, null, r.n, true));
+  h.classList.add('tg'); h.firstChild.prepend(el('span', 'cv', '›'));
+  h.addEventListener('click', () => w.classList.toggle('open'));
+  w.append(h, sub); return w;
 }
 function rgRow(name, n, p, max, none) {
   const r = el('div', none ? 'rr none' : 'rr'), tr = el('div', 'tr'), i = el('i'); i.style.width = (n / max * 100) + '%'; tr.append(i);
@@ -400,6 +419,13 @@ function rgInfo(k) {
   const r = rgData.by[k] || {name: RG_NAME[k], n: 0, part: 0, full: 0}, b = $('rginfo'), pp = el('div', 'pp');
   pp.append(el('span', 'qp' + (r.part ? '' : ' z'), `qisman ${num(r.part)}`), el('span', 'tp' + (r.full ? '' : ' z'), `to'liq ${num(r.full)}`));
   b.replaceChildren(el('b', '', r.name), el('div', 'big', num(r.n)), 'lid', pp);
+  if (!r.n) return;
+  const cs = r.cities || [], ct = el('div', 'rgct'), rest = r.n - cs.reduce((a, c) => a + c.n, 0);
+  ct.append(el('div', 'h', 'Shahar / tuman'));
+  cs.slice(0, 6).forEach((c) => { const d = el('div'); d.append(el('span', '', c.name), el('b', '', num(c.n))); ct.append(d); });
+  if (cs.length > 6) ct.append(el('div', 'z', `yana ${cs.length - 6} ta`));
+  if (rest > 0) { const d = el('div', 'z'); d.append(el('span', '', 'kiritilmagan'), el('b', '', num(rest))); ct.append(d); }
+  b.append(ct);
 }
 function rgPaint() {
   if (!rgGeo || rgGeo === 'loading' || !rgData) return;
