@@ -104,6 +104,27 @@ tfoot td { font-weight:750; border-bottom:0; }
 .fr .st b { color:var(--fg); font-size:15px; }
 .fr .st .ls { color:var(--low); font-weight:600; }
 .fr.rf { margin-top:14px; padding-top:14px; border-top:1px dashed var(--line); }
+.ph .tbtn { margin-left:auto; font:inherit; font-weight:750; font-size:14px; letter-spacing:.3px; padding:10px 18px; border-radius:12px;
+  border:1px solid var(--blue); background:var(--blue); color:#fff; cursor:pointer; }
+.ph .tbtn:hover { filter:brightness(1.08); }
+.mdl { position:fixed; inset:0; background:rgba(15,23,42,.45); display:none; place-items:center; z-index:50; padding:16px; }
+.mdl.on { display:grid; }
+.mdl .box { background:var(--panel); border-radius:20px; padding:26px 28px; width:min(420px,100%); box-shadow:0 20px 50px rgba(0,0,0,.25); }
+.mdl .box h3 { margin:0 0 4px; font-size:16px; color:var(--muted); font-weight:650; text-transform:uppercase; letter-spacing:.4px; }
+.mdl .box .big { font-size:46px; font-weight:800; font-variant-numeric:tabular-nums; margin:4px 0 14px; }
+.mdl .box .row { display:flex; justify-content:space-between; padding:9px 0; border-top:1px solid var(--line); font-size:15px; }
+.mdl .box .row { gap:12px; } .mdl .box .row b { font-variant-numeric:tabular-nums; white-space:nowrap; text-align:right; }
+.mdl .box .row.r b { color:var(--low); }
+.mdl .box .cls { margin-top:16px; width:100%; font:inherit; font-weight:650; padding:10px; border-radius:12px; border:1px solid var(--line); background:var(--track); cursor:pointer; }
+.lc { display:flex; flex-direction:column; gap:10px; }
+.lcr { display:grid; grid-template-columns:260px minmax(0,1fr) 110px; gap:16px; align-items:center; }
+.lcr .nm { font-weight:650; font-size:14.5px; color:#2b3850; }
+.lcr .nm small { display:block; font-weight:500; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lcr .tr { height:30px; background:var(--track); border-radius:8px; overflow:hidden; }
+.lcr .bx { height:100%; border-radius:8px; background:#e0525a; min-width:4px; }
+.lcr .st { text-align:right; font-variant-numeric:tabular-nums; color:var(--muted); font-size:13.5px; }
+.lcr .st b { color:var(--fg); font-size:15px; }
+@media (max-width:760px) { .lcr { grid-template-columns:minmax(0,1fr) 80px; } .lcr .tr { grid-column:1 / -1; grid-row:2; } }
 .fr.rf .st .rs { color:var(--low); font-weight:650; }
 .rg { display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:24px; align-items:center; }
 #rgmap { width:100%; height:auto; display:block; }
@@ -175,11 +196,22 @@ tfoot td { font-weight:750; border-bottom:0; }
   </section>
 
   <section class="panel">
-    <div class="ph"><div class="ib" data-i="funnel"></div><h2>Sotuv voronkasi</h2></div>
-    <p class="pnote" id="fnnote">Shu davrda kelgan lidlar: har bir etapga nechtasi yetib kelgan (hozir shu yoki keyingi etapda). To'lov etaplariga shu davrda o'tkazilgan oldingi kunlardagi lidlar ham qo'shiladi. Yopilgan — shu etapda yopilgan (lost) lidlar.</p>
+    <div class="ph"><div class="ib" data-i="funnel"></div><h2>Etaplar bo'yicha lidlar</h2><button class="tbtn" id="totbtn" type="button">UMUMIY LID</button></div>
+    <p class="pnote" id="fnnote">Shu davrda kelgan lidlardan hozir har bir etapda nechtasi turibdi (faol lidlar). To'lov etaplariga shu davrda o'tkazilgan oldingi kunlardagi lidlar ham qo'shiladi.</p>
     <div class="fn" id="fn"></div>
     <div class="fsum" id="fsum"></div>
   </section>
+
+  <section class="panel">
+    <div class="ph"><div class="ib" data-i="x"></div><h2>Yopilgan lidlar sabablari</h2></div>
+    <p class="pnote">Shu davrda yopilgan (lost) lidlar, "Комментарий к потере" izohi bo'yicha toifalangan. Izoh bo'lmasa — Odoo'dagi yopilish sababi.</p>
+    <div class="lc" id="lc"></div>
+  </section>
+
+  <div class="mdl" id="totmdl"><div class="box">
+    <h3>Umumiy lid</h3><div class="big" id="totbig">—</div><div id="totrows"></div>
+    <button class="cls" id="totcls" type="button">Yopish</button>
+  </div></div>
 
   <section class="panel">
     <div class="ph"><div class="ib" data-i="map"></div><h2>Mijozlar hududi</h2></div>
@@ -241,6 +273,12 @@ const KEY = new URLSearchParams(location.hash.slice(1)).get('k') || new URLSearc
 const COLORS = ['#13937f', '#2563eb', '#d4991f', '#8b5cf6', '#5fa30f', '#0891b2'];
 let state = { p: 'all', d: '', l: 'bot' }, busy = false, seq = 0;
 const $ = (id) => document.getElementById(id);
+document.addEventListener('click', (e) => {
+  const m = document.getElementById('totmdl'); if (!m) return;
+  if (e.target.id === 'totbtn') m.classList.add('on');
+  else if (e.target.id === 'totcls' || e.target === m) m.classList.remove('on');
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const m = document.getElementById('totmdl'); if (m) m.classList.remove('on'); } });
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const num = (n) => Math.round(n).toLocaleString('ru-RU');
 const som = (n) => num(n) + " so'm";
@@ -325,34 +363,46 @@ function render(raw) {
   }));
   $('revsum').textContent = k.revenueKnown ? som(k.revenue) : '—';
 
-  // Voronka: ko'kning ochdan to'qqa o'tuvchi tuslari
-  const FA = d.funnel || [], F = FA.filter((s) => !s.refund), RF = FA.filter((s) => s.refund), top = F.length ? F[0].reached : 0, shade = (i) => `hsl(213, 78%, ${68 - i / Math.max(1, F.length - 1) * 30}%)`;
+  // Etaplar: hozir har bir etapda nechta faol lid bor (oqim emas). DEPOZIT TG va PROPUSHENNIY ZVONOK ko'rsatilmaydi.
+  const FA = d.funnel || [], F = FA.filter((s) => !s.refund), RF = FA.filter((s) => s.refund);
+  const mx = Math.max(1, ...F.map((s) => s.now)), act = F.reduce((a, s) => a + s.now, 0), shade = (i) => `hsl(213, 78%, ${68 - i / Math.max(1, F.length - 1) * 30}%)`;
   const fn = [];
   F.forEach((s, i) => {
-    if (i) { const c = el('div', 'fc'); c.append(el('span', '', s.reached > F[i - 1].reached ? `+${num(s.reached - F[i - 1].reached)} oldingi kunlardan` : '↓ ' + share(s.reached, F[i - 1].reached))); fn.push(c); }
     const r = el('div', 'fr'), nm = el('div', 'nm', s.name);
-    nm.append(el('small', '', s.now ? `hozir shu etapda: ${num(s.now)}` + (s.sum ? ` · ${som(s.sum)}` : '') : ''));
-    const tr = el('div', 'tr'), bx = el('div', 'bx', num(s.reached));
-    bx.style.width = (top ? Math.max(s.reached / top * 100, 0) : 0) + '%'; bx.style.background = s.reached ? shade(i) : '#cbd5e1';
+    nm.append(el('small', '', s.sum ? som(s.sum) : ''));
+    const tr = el('div', 'tr'), bx = el('div', 'bx', num(s.now));
+    bx.style.width = (s.now / mx * 100) + '%'; bx.style.background = s.now ? shade(i) : '#cbd5e1';
     tr.append(bx);
-    const st = el('div', 'st'); st.append(el('b', '', share(s.reached, top)), ' jamidan');
-    if (s.lost) { st.append(el('br')); st.append(el('span', 'ls', `yopilgan: ${num(s.lost)}`)); }
+    const st = el('div', 'st'); st.append(el('b', '', share(s.now, act)), ' faol lidlardan');
     r.append(nm, tr, st); fn.push(r);
   });
   RF.forEach((s) => {
     const r = el('div', 'fr rf'), nm = el('div', 'nm', s.name);
     nm.append(el('small', '', "shu davrda vozvrat qilinganlar"));
     const tr = el('div', 'tr'), bx = el('div', 'bx', num(s.reached));
-    bx.style.width = (top ? Math.max(s.reached / top * 100, 0) : 0) + '%'; bx.style.background = s.reached ? '#dc2626' : '#cbd5e1';
+    bx.style.width = (s.reached / mx * 100) + '%'; bx.style.background = s.reached ? '#dc2626' : '#cbd5e1';
     tr.append(bx);
     const st = el('div', 'st'); st.append(el('b', '', `${num(s.reached)} ta`), el('br'), el('span', 'rs', som(s.sum || 0)));
     r.append(nm, tr, st); fn.push(r);
   });
   $('fn').replaceChildren(...fn);
-  const lostAll = F.reduce((a, s) => a + s.lost, 0), last = F.length ? F[F.length - 1].reached : 0;
-  const fs = el('div'); fs.append(`${F.length ? F[0].name : ''} → ${F.length ? F[F.length - 1].name : ''}: `, el('b', '', share(last, top)));
-  const fl = el('div'); fl.append('Yopilgan (lost) lidlar: ', el('b', 'r', `${num(lostAll)} ta`), ` · ${share(lostAll, top)}`);
-  $('fsum').replaceChildren(fs, fl);
+  const T = d.stageTotal || {all: k.newLeads, active: act, lost: 0, hidden: []};
+  const fs = el('div'); fs.append('Hozir etaplarda jami: ', el('b', '', `${num(act)} ta faol lid`));
+  $('fsum').replaceChildren(fs);
+  // UMUMIY LID oynasi
+  $('totbig').textContent = num(T.all) + ' ta';
+  const trow = (a, b, c) => { const x = el('div', 'row' + (c ? ' ' + c : '')); x.append(el('span', '', a), el('b', '', b)); return x; };
+  $('totrows').replaceChildren(trow('Davr', d.label), trow('Faol (etaplarda)', num(T.active) + ' ta'), trow('Yopilgan (lost)', num(T.lost) + ' ta', 'r'),
+    trow('Patok boshidan jami', num(k.totalLeads) + ' ta'));
+  // Yopilgan lidlar sabablari
+  const LC = d.lostCats || [], lmx = Math.max(1, ...LC.map((c) => c.n)), lsum = LC.reduce((a, c) => a + c.n, 0);
+  $('lc').replaceChildren(...(LC.length ? LC.map((c) => {
+    const r = el('div', 'lcr'), nm = el('div', 'nm', c.name);
+    if (c.ex && c.ex.length) { const sm = el('small', '', '«' + c.ex[0] + '»'); r.title = c.ex.join('\n'); nm.append(sm); }
+    const tr = el('div', 'tr'), bx = el('div', 'bx'); bx.style.width = (c.n / lmx * 100) + '%'; tr.append(bx);
+    const st = el('div', 'st'); st.append(el('b', '', num(c.n) + ' ta'), ' · ' + share(c.n, lsum));
+    r.append(nm, tr, st); return r;
+  }) : [el('p', 'pnote', "Bu davrda yopilgan lid yo'q")]));
   renderRegions(d.regions);
 
   const rows = d.managers.slice().sort((a, b) => b.sec - a.sec);
