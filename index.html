@@ -124,6 +124,21 @@ tfoot td { font-weight:750; border-bottom:0; }
 .lcr .bx { height:100%; border-radius:8px; background:#e0525a; min-width:4px; }
 .lcr .st { text-align:right; font-variant-numeric:tabular-nums; color:var(--muted); font-size:13.5px; }
 .lcr .st b { color:var(--fg); font-size:15px; }
+.pf { display:grid; grid-template-columns:1fr 1fr; gap:28px; }
+.pf h3 { margin:0 0 4px; font-size:15px; color:#2b3850; }
+.pf .sub { color:var(--muted); font-size:12.5px; margin-bottom:12px; }
+.pfr { display:grid; grid-template-columns:150px minmax(0,1fr) 84px; gap:12px; align-items:center; margin-bottom:8px; }
+.pfr .nm { font-weight:600; font-size:13.5px; color:#2b3850; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pfr .tr { height:24px; background:var(--track); border-radius:7px; overflow:hidden; }
+.pfr .bx { height:100%; border-radius:7px; min-width:3px; }
+.pfr .st { text-align:right; font-variant-numeric:tabular-nums; color:var(--muted); font-size:12.5px; }
+.pfr .st b { color:var(--fg); font-size:14px; }
+.agec { display:flex; align-items:flex-end; gap:8px; height:170px; padding-top:18px; }
+.agec .c { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:4px; }
+.agec .v { font-size:12.5px; font-weight:650; font-variant-numeric:tabular-nums; }
+.agec .b { width:100%; max-width:46px; background:#3b7dd8; border-radius:6px 6px 2px 2px; min-height:2px; }
+.agec .l { font-size:11.5px; color:var(--muted); white-space:nowrap; }
+@media (max-width:760px) { .pf { grid-template-columns:1fr; } .pfr { grid-template-columns:110px minmax(0,1fr) 70px; } }
 @media (max-width:760px) { .lcr { grid-template-columns:minmax(0,1fr) 80px; } .lcr .tr { grid-column:1 / -1; grid-row:2; } }
 .fr.rf .st .rs { color:var(--low); font-weight:650; }
 .rg { display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:24px; align-items:center; }
@@ -206,6 +221,13 @@ tfoot td { font-weight:750; border-bottom:0; }
     <div class="ph"><div class="ib" data-i="x"></div><h2>Yopilgan lidlar sabablari</h2></div>
     <p class="pnote">Shu davrda yopilgan (lost) lidlar, "Комментарий к потере" izohi bo'yicha toifalangan. Izoh bo'lmasa — Odoo'dagi yopilish sababi.</p>
     <div class="lc" id="lc"></div>
+  </section>
+
+  <section class="panel">
+    <div class="ph"><div class="ib" data-i="map"></div><h2>Mijozlar profili: kasbi va yoshi</h2></div>
+    <p class="pnote">Shu davrda kelgan lidlar, Odoo'dagi "Kasbi" va "Yoshi" maydonlari bo'yicha. Maydon to'ldirilmagan lidlar hisobga kirmaydi.</p>
+    <div class="pf"><div><h3>Kasbi</h3><div class="sub" id="pfks"></div><div id="pfk"></div></div>
+      <div><h3>Yoshi</h3><div class="sub" id="pfas"></div><div class="agec" id="pfa"></div></div></div>
   </section>
 
   <div class="mdl" id="totmdl"><div class="box">
@@ -403,6 +425,24 @@ function render(raw) {
     const st = el('div', 'st'); st.append(el('b', '', num(c.n) + ' ta'), ' · ' + share(c.n, lsum));
     r.append(nm, tr, st); return r;
   }) : [el('p', 'pnote', "Bu davrda yopilgan lid yo'q")]));
+  // Mijozlar profili: kasbi va yoshi
+  const P = d.profile || {total: 0, kasbKnown: 0, ageKnown: 0, kasb: [], age: []};
+  const KC = ['#2f9e6e', '#3b7dd8', '#d98a2b', '#8a5cd6', '#d65c8a', '#4aa5b8', '#9a9a3a', '#8b95a5'];
+  $('pfks').textContent = 'Ma\'lum: ' + num(P.kasbKnown) + ' / ' + num(P.total) + ' ta lid';
+  const kmx = Math.max(1, ...P.kasb.map((x) => x.n));
+  $('pfk').replaceChildren(...(P.kasb.length ? P.kasb.map((x, i) => {
+    const r = el('div', 'pfr'), tr = el('div', 'tr'), bx = el('div', 'bx');
+    bx.style.width = (x.n / kmx * 100) + '%'; bx.style.background = KC[i % KC.length]; tr.append(bx);
+    const st = el('div', 'st'); st.append(el('b', '', num(x.n)), ' · ' + share(x.n, P.kasbKnown));
+    r.append(el('div', 'nm', x.name), tr, st); return r;
+  }) : [el('p', 'pnote', "Bu davrda kasbi yozilgan lid yo'q")]));
+  $('pfas').textContent = 'Ma\'lum: ' + num(P.ageKnown) + ' / ' + num(P.total) + ' ta lid' + (P.ageKnown ? ' · o\'rtacha ' + P.ageAvg + ' yosh' : '');
+  const amx = Math.max(1, ...P.age.map((x) => x.n));
+  $('pfa').replaceChildren(...(P.ageKnown ? P.age.map((x) => {
+    const c = el('div', 'c'), b = el('div', 'b'); b.style.height = (x.n / amx * 120) + 'px';
+    c.title = x.name + ': ' + x.n + ' ta';
+    c.append(el('div', 'v', x.n ? num(x.n) : ''), b, el('div', 'l', x.name)); return c;
+  }) : [el('p', 'pnote', "Bu davrda yoshi yozilgan lid yo'q")]));
   renderRegions(d.regions);
 
   const rows = d.managers.slice().sort((a, b) => b.sec - a.sec);
