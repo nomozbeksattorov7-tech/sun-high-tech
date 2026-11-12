@@ -360,7 +360,7 @@ function render(raw) {
     ['pct', 'Gaplashish ulushi', talkRate == null ? '—' : pct(talkRate), null,
       grade(talkRate, 45, 30, true, ["Yaxshi — mijozlar ko'taryapti", "Me'yorda", "Past — ko'p qo'ng'iroq javobsiz"])],
     ['timer', "O'rtacha suhbat", k.talked ? hms(avg) : '—', null,
-      k.talked ? grade(avg / 60, 4, 2, true, ["Yaxshi — chuqur suhbat", "Me'yorda", "Qisqa — taqdimot yetmayapti"]) : null],
+      k.talked ? grade(avg / 60, 6, 4, true, ["Yaxshi — skript to'liq", "Me'yorda", "Qisqa — skript yetmayapti"]) : null],  // 12.11.2026: ovozli skript to'liq aytilishi ~6–8 daq.
     ['refund', 'Vozvrat qilindi', num(k.refund || 0) + ' ta', som(k.refundSum || 0) + ' qaytarilgan'],
     ['clock', 'Calltime', hms(k.sec), `${num(k.talked)} ta suhbat · soat:daqiqa:soniya`],
   ];
