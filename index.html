@@ -351,7 +351,7 @@ function render(raw) {
     return c;
   }));
 
-  const talkRate = ratio(k.talked, k.out), avg = k.talked ? k.sec / k.talked : 0;
+  const talkRate = ratio(k.talked, k.out), avg = k.conv ? k.convSec / k.conv : 0;
   const metrics = [
     ['out', 'Telefon qilingan', num(k.out), `${share(k.out, k.newLeads)} · yangi lidlarga nisbatan`],
     ['talk', 'Gaplashilgan', num(k.talked), `${share(k.talked, k.newLeads)} · yangi lidlarga nisbatan`],
@@ -359,15 +359,15 @@ function render(raw) {
     ['x', 'Sifatsiz lidlar', num(k.lost), `${share(k.lost, k.newLeads)} · yopilgan (lost) lidlar`],
     ['pct', 'Gaplashish ulushi', talkRate == null ? '—' : pct(talkRate), null,
       grade(talkRate, 45, 30, true, ["Yaxshi — mijozlar ko'taryapti", "Me'yorda", "Past — ko'p qo'ng'iroq javobsiz"])],
-    ['timer', "O'rtacha suhbat", k.talked ? hms(avg) : '—', null,
-      k.talked ? grade(avg / 60, 6, 4, true, ["Yaxshi — skript to'liq", "Me'yorda", "Qisqa — skript yetmayapti"]) : null],  // 12.11.2026: ovozli skript to'liq aytilishi ~6–8 daq.
+    ['timer', "O'rtacha suhbat", k.conv ? hms(avg) : '—', `1 daqiqadan uzun ${num(k.conv || 0)} ta suhbat`,
+      k.conv ? grade(avg / 60, 6, 4, true, ["Yaxshi — skript to'liq", "Me'yorda", "Qisqa — skript yetmayapti"]) : null],  // 12.11.2026: ovozli skript to'liq aytilishi ~6–8 daq.
     ['refund', 'Vozvrat qilindi', num(k.refund || 0) + ' ta', som(k.refundSum || 0) + ' qaytarilgan'],
     ['clock', 'Calltime', hms(k.sec), `${num(k.talked)} ta suhbat · soat:daqiqa:soniya`],
   ];
   $('mgrid').replaceChildren(...metrics.map(([ic, t, v, n, tag]) => {
     const m = el('div', 'm'), h = el('div', 'mh'), ib = el('div', 'ib'); ib.innerHTML = svg(ic);
     h.append(ib, el('div', 't', t)); m.append(h, el('div', 'v', v));
-    if (tag) m.append(el('span', 'tag ' + tag[0], tag[1])); else if (n) m.append(el('div', 'n', n));
+    if (n) m.append(el('div', 'n', n)); if (tag) m.append(el('span', 'tag ' + tag[0], tag[1]));
     return m;
   }));
 
