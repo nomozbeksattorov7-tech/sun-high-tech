@@ -234,6 +234,7 @@ tfoot td { font-weight:750; border-bottom:0; }
   <section class="panel">
     <div class="ph"><div class="ib" data-i="map"></div><h2>Mijozlar profili: kasbi va yoshi</h2></div>
     <p class="pnote">Shu davrda kelgan lidlar, Odoo'dagi "Kasbi" va "Yoshi" maydonlari bo'yicha. Maydon to'ldirilmagan lidlar hisobga kirmaydi.</p>
+    <div class="ftags" id="ptags"></div>
     <div class="pf"><div><h3>Kasbi</h3><div class="sub" id="pfks"></div><div id="pfk"></div></div>
       <div><h3>Yoshi</h3><div class="sub" id="pfas"></div><div class="agec" id="pfa"></div></div></div>
   </section>
@@ -465,9 +466,16 @@ function drawLost(d) {
   }) : [el('p', 'pnote', "Bu davrda yopilgan lid yo'q")]));
 }
 
+// ptag — profil bo'limida tanlangan guruh ('' = UMUMIY, 'bot' = BotReg, 'target' = Target)
+let ptag = '';
 function drawProfile(d) {
   // Mijozlar profili: kasbi va yoshi
-  const P = d.profile || {total: 0, kasbKnown: 0, ageKnown: 0, kasb: [], age: []};
+  const PT = (d.funnelTags || []).filter((t) => t.profile), psel = PT.find((t) => t.id === ptag);
+  if (!psel) ptag = '';
+  const pmk = (id, name, n) => { const b = el('button', id === ptag ? 'on' : '', name); b.type = 'button'; b.dataset.t = id; b.append(el('small', '', num(n))); return b; };
+  $('ptags').replaceChildren(...(PT.length ? [pmk('', 'UMUMIY', (d.profile || {total: 0}).total)].concat(PT.map((t) => { const b = pmk(t.id, t.name, t.profile.total); if (t.tags) b.title = t.tags.join(', '); return b; })) : []));
+  $('ptags').hidden = !PT.length;
+  const P = (psel ? psel.profile : d.profile) || {total: 0, kasbKnown: 0, ageKnown: 0, kasb: [], age: []};
   const KC = ['#2f9e6e', '#3b7dd8', '#d98a2b', '#8a5cd6', '#d65c8a', '#4aa5b8', '#9a9a3a', '#8b95a5'];
   $('pfks').textContent = 'Ma\'lum: ' + num(P.kasbKnown) + ' / ' + num(P.total) + ' ta lid';
   const kmx = Math.max(1, ...P.kasb.map((x) => x.n));
@@ -600,6 +608,10 @@ $('tabs').addEventListener('click', (e) => {
 $('ftags').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b || !lastData) return;
   ftag = b.dataset.t || ''; drawFunnel(lastData);
+});
+$('ptags').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b || !lastData) return;
+  ptag = b.dataset.t || ''; drawProfile(lastData);
 });
 $('ltags').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b || !lastData) return;
