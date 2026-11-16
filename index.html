@@ -107,6 +107,12 @@ tfoot td { font-weight:750; border-bottom:0; }
 .ph .tbtn { margin-left:auto; font:inherit; font-weight:750; font-size:14px; letter-spacing:.3px; padding:10px 18px; border-radius:12px;
   border:1px solid var(--blue); background:var(--blue); color:#fff; cursor:pointer; }
 .ph .tbtn:hover { filter:brightness(1.08); }
+.ftags { display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 16px; }
+.ftags button { font:inherit; font-weight:650; font-size:14px; padding:8px 14px; border-radius:999px; border:1px solid var(--line);
+  background:var(--panel); color:var(--fg); cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+.ftags button small { font-weight:700; font-size:12px; opacity:.65; }
+.ftags button.on { background:var(--dark); color:#fff; border-color:var(--dark); }
+.ftags button:focus-visible { outline:2px solid var(--dark); outline-offset:2px; }
 .mdl { position:fixed; inset:0; background:rgba(15,23,42,.45); display:none; place-items:center; z-index:50; padding:16px; }
 .mdl.on { display:grid; }
 .mdl .box { background:var(--panel); border-radius:20px; padding:26px 28px; width:min(420px,100%); box-shadow:0 20px 50px rgba(0,0,0,.25); }
@@ -213,6 +219,7 @@ tfoot td { font-weight:750; border-bottom:0; }
   <section class="panel">
     <div class="ph"><div class="ib" data-i="funnel"></div><h2>Etaplar bo'yicha lidlar</h2><button class="tbtn" id="totbtn" type="button">UMUMIY LID</button></div>
     <p class="pnote" id="fnnote">Shu davrda kelgan lidlardan hozir har bir etapda nechtasi turibdi (faol lidlar). To'lov etaplariga shu davrda o'tkazilgan oldingi kunlardagi lidlar ham qo'shiladi.</p>
+    <div class="ftags" id="ftags"></div>
     <div class="fn" id="fn"></div>
     <div class="fsum" id="fsum"></div>
   </section>
@@ -327,13 +334,13 @@ function kpiLine(sum, tiers) {
 function render(raw) {
   const d = JSON.parse(raw), k = d.kpi;
   const range = d.from === d.to ? d.from.split('-').reverse().join('.') : `${d.from.split('-').reverse().join('.')} — ${d.to.split('-').reverse().join('.')}`;
-  $('sub').textContent = `${d.label} · ${range} · BotReg / BotDeposit teglari bor lidlar · ma'lumotlar Odoo'dan`;
+  $('sub').textContent = `${d.label} · ${range} · BotReg / BotDeposit / primoytarget teglari bor lidlar · ma'lumotlar Odoo'dan`;
   $('upd').textContent = 'Jonli · ' + d.updated.slice(11);
   $('live').classList.remove('err');
 
   const hero = [
     ['wallet', 'Jami tushum', k.revenueKnown ? num(k.revenue) : '—', "so'm", !k.revenueKnown ? "Bu davr uchun tushum tarixi hali yo'q" : k.revenueApprox ? `Taxminiy · shu davrda yangilangan lidlar bo'yicha` : `Menejerlar + avtoto'lov · ${d.label.toLowerCase()}`],
-    ['users', 'Yangi lidlar', num(k.newLeads), 'ta', d.period === 'all' ? 'BotReg / BotDeposit teglari bor lidlar' : `Patok bo'yicha jami: ${num(k.totalLeads)} ta lid`],
+    ['users', 'Yangi lidlar', num(k.newLeads), 'ta', d.period === 'all' ? 'BotReg / BotDeposit / primoytarget teglari bor lidlar' : `Patok bo'yicha jami: ${num(k.totalLeads)} ta lid`],
     ['check', "To'liq to'lov", num(d.pay ? d.pay.full.n : k.full), 'ta', `Konversiya: ${share(k.full, k.newLeads)} yangi lidlardan`, d.pay && d.pay.full],
     ['pct', "Qisman to'lov", d.pay ? num(d.pay.part.n) : '—', 'ta', '', d.pay && d.pay.part],
   ];
@@ -385,8 +392,20 @@ function render(raw) {
   }));
   $('revsum').textContent = k.revenueKnown ? som(k.revenue) : '—';
 
-  // Etaplar: hozir har bir etapda nechta faol lid bor (oqim emas). DEPOZIT TG va PROPUSHENNIY ZVONOK ko'rsatilmaydi.
-  const FA = d.funnel || [], F = FA.filter((s) => !s.refund), RF = FA.filter((s) => s.refund);
+  lastData = d; drawFunnel(d);
+  drawRest(d);
+}
+
+// Etaplar: hozir har bir etapda nechta faol lid bor (oqim emas). DEPOZIT TG va PROPUSHENNIY ZVONOK ko'rsatilmaydi.
+// ftag — tanlangan teg (0 = hammasi): tugma bosilsa shu tegli lidlarning etaplardagi o'rni ko'rsatiladi
+let lastData = null, ftag = 0;
+function drawFunnel(d) {
+  const k = d.kpi, TG = d.funnelTags || [], sel = TG.find((t) => t.id === ftag);
+  if (!sel) ftag = 0;
+  const mk = (id, name, n) => { const b = el('button', id === ftag ? 'on' : '', name); b.type = 'button'; b.dataset.t = id; b.append(el('small', '', num(n))); return b; };
+  $('ftags').replaceChildren(...(TG.length ? [mk(0, 'Hammasi', (d.stageTotal || {all: k.newLeads}).all)].concat(TG.filter((t) => t.n || t.id === ftag || /primoy/i.test(t.name)).map((t) => mk(t.id, t.name, t.n))) : []));
+  $('ftags').hidden = !TG.length;
+  const FA = (sel ? sel.funnel : d.funnel) || [], F = FA.filter((s) => !s.refund), RF = FA.filter((s) => s.refund);
   const mx = Math.max(1, ...F.map((s) => s.now)), act = F.reduce((a, s) => a + s.now, 0), shade = (i) => `hsl(213, 78%, ${68 - i / Math.max(1, F.length - 1) * 30}%)`;
   const fn = [];
   F.forEach((s, i) => {
@@ -408,14 +427,20 @@ function render(raw) {
     r.append(nm, tr, st); fn.push(r);
   });
   $('fn').replaceChildren(...fn);
-  const T = d.stageTotal || {all: k.newLeads, active: act, lost: 0, hidden: []};
-  const fs = el('div'); fs.append('Hozir etaplarda jami: ', el('b', '', `${num(act)} ta faol lid`));
+  const T = (sel ? sel.stageTotal : d.stageTotal) || {all: k.newLeads, active: act, lost: 0, hidden: []};
+  const fs = el('div'); fs.append(sel ? `«${sel.name}» tegi — hozir etaplarda: ` : 'Hozir etaplarda jami: ', el('b', '', `${num(act)} ta faol lid`));
+  if (sel && T.lost) fs.append(` · yopilgan: ${num(T.lost)} ta`);
   $('fsum').replaceChildren(fs);
   // UMUMIY LID oynasi
   $('totbig').textContent = num(T.all) + ' ta';
   const trow = (a, b, c) => { const x = el('div', 'row' + (c ? ' ' + c : '')); x.append(el('span', '', a), el('b', '', b)); return x; };
-  $('totrows').replaceChildren(trow('Davr', d.label), trow('Faol (etaplarda)', num(T.active) + ' ta'), trow('Yopilgan (lost)', num(T.lost) + ' ta', 'r'),
-    trow('Patok boshidan jami', num(k.totalLeads) + ' ta'));
+  $('totrows').replaceChildren(...[trow('Davr', d.label)].concat(sel ? [trow('Teg', sel.name)] : [],
+    [trow('Faol (etaplarda)', num(T.active) + ' ta'), trow('Yopilgan (lost)', num(T.lost) + ' ta', 'r')],
+    sel ? [] : [trow('Patok boshidan jami', num(k.totalLeads) + ' ta')]));
+}
+
+function drawRest(d) {
+  const k = d.kpi;
   // Yopilgan lidlar sabablari
   const LC = d.lostCats || [], lmx = Math.max(1, ...LC.map((c) => c.n)), lsum = LC.reduce((a, c) => a + c.n, 0);
   $('lc').replaceChildren(...(LC.length ? LC.map((c) => {
@@ -555,6 +580,10 @@ $('tabs').addEventListener('click', (e) => {
   state = { p: b.dataset.p, d: '', l: state.l }; $('date').value = '';
   [...$('tabs').querySelectorAll('button')].forEach((x) => x.classList.toggle('on', x === b));
   busy = false; load();
+});
+$('ftags').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b || !lastData) return;
+  ftag = Number(b.dataset.t) || 0; drawFunnel(lastData);
 });
 $('date').addEventListener('change', (e) => {
   if (!e.target.value) return;
