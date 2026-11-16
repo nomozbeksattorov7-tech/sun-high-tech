@@ -227,6 +227,7 @@ tfoot td { font-weight:750; border-bottom:0; }
   <section class="panel">
     <div class="ph"><div class="ib" data-i="x"></div><h2>Yopilgan lidlar sabablari</h2></div>
     <p class="pnote">Shu davrda yopilgan (lost) lidlar, "Комментарий к потере" izohi bo'yicha toifalangan. Izoh bo'lmasa — Odoo'dagi yopilish sababi.</p>
+    <div class="ftags" id="ltags"></div>
     <div class="lc" id="lc"></div>
   </section>
 
@@ -441,8 +442,20 @@ function drawFunnel(d) {
 
 function drawRest(d) {
   const k = d.kpi;
-  // Yopilgan lidlar sabablari
-  const LC = d.lostCats || [], lmx = Math.max(1, ...LC.map((c) => c.n)), lsum = LC.reduce((a, c) => a + c.n, 0);
+  drawLost(d);
+  drawProfile(d);
+}
+
+// Yopilgan lidlar sabablari. ltag — tanlangan guruh ('' = UMUMIY, 'bot' = BotReg, 'target' = Target)
+let ltag = '';
+function drawLost(d) {
+  const TG = (d.funnelTags || []).filter((t) => t.lostCats), sel = TG.find((t) => t.id === ltag);
+  if (!sel) ltag = '';
+  const cnt = (a) => (a || []).reduce((x, c) => x + c.n, 0);
+  const mk = (id, name, n) => { const b = el('button', id === ltag ? 'on' : '', name); b.type = 'button'; b.dataset.t = id; b.append(el('small', '', num(n))); return b; };
+  $('ltags').replaceChildren(...(TG.length ? [mk('', 'UMUMIY', cnt(d.lostCats))].concat(TG.map((t) => { const b = mk(t.id, t.name, cnt(t.lostCats)); if (t.tags) b.title = t.tags.join(', '); return b; })) : []));
+  $('ltags').hidden = !TG.length;
+  const LC = (sel ? sel.lostCats : d.lostCats) || [], lmx = Math.max(1, ...LC.map((c) => c.n)), lsum = LC.reduce((a, c) => a + c.n, 0);
   $('lc').replaceChildren(...(LC.length ? LC.map((c) => {
     const r = el('div', 'lcr'), nm = el('div', 'nm', c.name);
     if (c.ex && c.ex.length) { const sm = el('small', '', '«' + c.ex[0] + '»'); r.title = c.ex.join('\n'); nm.append(sm); }
@@ -450,6 +463,9 @@ function drawRest(d) {
     const st = el('div', 'st'); st.append(el('b', '', num(c.n) + ' ta'), ' · ' + share(c.n, lsum));
     r.append(nm, tr, st); return r;
   }) : [el('p', 'pnote', "Bu davrda yopilgan lid yo'q")]));
+}
+
+function drawProfile(d) {
   // Mijozlar profili: kasbi va yoshi
   const P = d.profile || {total: 0, kasbKnown: 0, ageKnown: 0, kasb: [], age: []};
   const KC = ['#2f9e6e', '#3b7dd8', '#d98a2b', '#8a5cd6', '#d65c8a', '#4aa5b8', '#9a9a3a', '#8b95a5'];
@@ -584,6 +600,10 @@ $('tabs').addEventListener('click', (e) => {
 $('ftags').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b || !lastData) return;
   ftag = b.dataset.t || ''; drawFunnel(lastData);
+});
+$('ltags').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b || !lastData) return;
+  ltag = b.dataset.t || ''; drawLost(lastData);
 });
 $('date').addEventListener('change', (e) => {
   if (!e.target.value) return;
