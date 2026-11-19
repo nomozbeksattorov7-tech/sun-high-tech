@@ -145,6 +145,18 @@ tfoot td { font-weight:750; border-bottom:0; }
 .agec .b { width:100%; max-width:46px; background:#3b7dd8; border-radius:6px 6px 2px 2px; min-height:2px; }
 .agec .l { font-size:11.5px; color:var(--muted); white-space:nowrap; }
 @media (max-width:760px) { .pf { grid-template-columns:1fr; } .pfr { grid-template-columns:110px minmax(0,1fr) 70px; } }
+#ltags small.lsm { color:#c2414a; font-weight:650; }
+#ltags button.on small.lsm { color:#ff9aa1; }
+.lcr .st .ls { display:block; color:#c2414a; font-weight:650; font-size:12.5px; }
+.lp h3 { margin:22px 0 4px; font-size:15px; color:#2b3850; }
+.lp .sub { color:var(--muted); font-size:12.5px; margin-bottom:8px; }
+.lpt { width:100%; border-collapse:collapse; font-size:13.5px; }
+.lpt th { text-align:left; color:var(--muted); font-weight:600; font-size:12px; padding:6px 8px; border-bottom:1px solid var(--track); }
+.lpt td { padding:7px 8px; border-bottom:1px solid var(--track); vertical-align:top; }
+.lpt td.n { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:650; color:#c2414a; }
+.lpt td.c { color:var(--muted); font-size:12.5px; }
+.lpt tfoot td { font-weight:700; border-bottom:0; }
+@media (max-width:760px) { .lpt .hm { display:none; } }
 @media (max-width:760px) { .lcr { grid-template-columns:minmax(0,1fr) 80px; } .lcr .tr { grid-column:1 / -1; grid-row:2; } }
 .fr.rf .st .rs { color:var(--low); font-weight:650; }
 .rg { display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:24px; align-items:center; }
@@ -229,6 +241,7 @@ tfoot td { font-weight:750; border-bottom:0; }
     <p class="pnote">Shu davrda yopilgan (lost) lidlar, "Комментарий к потере" izohi bo'yicha toifalangan. Izoh bo'lmasa — Odoo'dagi yopilish sababi.</p>
     <div class="ftags" id="ltags"></div>
     <div class="lc" id="lc"></div>
+    <div class="lp" id="lp"></div>
   </section>
 
   <section class="panel">
@@ -453,8 +466,11 @@ function drawLost(d) {
   const TG = (d.funnelTags || []).filter((t) => t.lostCats), sel = TG.find((t) => t.id === ltag);
   if (!sel) ltag = '';
   const cnt = (a) => (a || []).reduce((x, c) => x + c.n, 0);
-  const mk = (id, name, n) => { const b = el('button', id === ltag ? 'on' : '', name); b.type = 'button'; b.dataset.t = id; b.append(el('small', '', num(n))); return b; };
-  $('ltags').replaceChildren(...(TG.length ? [mk('', 'UMUMIY', cnt(d.lostCats))].concat(TG.map((t) => { const b = mk(t.id, t.name, cnt(t.lostCats)); if (t.tags) b.title = t.tags.join(', '); return b; })) : []));
+  const lsm = (a) => (a || []).reduce((x, c) => x + (c.sum || 0), 0);
+  // 19.11.2026: tugmada soni yonida yopilgan lidlar summasi ham (foydalanuvchi)
+  const mk = (id, name, n, sm) => { const b = el('button', id === ltag ? 'on' : '', name); b.type = 'button'; b.dataset.t = id; b.append(el('small', '', num(n)));
+    if (sm) b.append(el('small', 'lsm', som(sm))); return b; };
+  $('ltags').replaceChildren(...(TG.length ? [mk('', 'UMUMIY', cnt(d.lostCats), lsm(d.lostCats))].concat(TG.map((t) => { const b = mk(t.id, t.name, cnt(t.lostCats), lsm(t.lostCats)); if (t.tags) b.title = t.tags.join(', '); return b; })) : []));
   $('ltags').hidden = !TG.length;
   const LC = (sel ? sel.lostCats : d.lostCats) || [], lmx = Math.max(1, ...LC.map((c) => c.n)), lsum = LC.reduce((a, c) => a + c.n, 0);
   $('lc').replaceChildren(...(LC.length ? LC.map((c) => {
@@ -462,8 +478,20 @@ function drawLost(d) {
     if (c.ex && c.ex.length) { const sm = el('small', '', '«' + c.ex[0] + '»'); r.title = c.ex.join('\n'); nm.append(sm); }
     const tr = el('div', 'tr'), bx = el('div', 'bx'); bx.style.width = (c.n / lmx * 100) + '%'; tr.append(bx);
     const st = el('div', 'st'); st.append(el('b', '', num(c.n) + ' ta'), ' · ' + share(c.n, lsum));
+    if (c.sum) st.append(el('span', 'ls', som(c.sum)));   // 19.11.2026: yopilgan lidlardagi summa
     r.append(nm, tr, st); return r;
   }) : [el('p', 'pnote', "Bu davrda yopilgan lid yo'q")]));
+  // Summasi bor yopilgan lidlar ro'yxati
+  const LP = (sel ? sel.lostPaid : d.lostPaid) || [];
+  if (!LP.length) { $('lp').replaceChildren(); return; }
+  const tot = LP.reduce((a, x) => a + x.sum, 0);
+  const t = el('table', 'lpt'), th = el('tr');
+  ['Sana', 'Lid', 'Menejer', 'Summa', 'Izoh'].forEach((h, i) => th.append(el('th', i === 0 || i === 4 ? 'hm' : '', h)));
+  const tb = el('tbody');
+  LP.forEach((x) => { const r = el('tr'); r.append(el('td', 'hm', x.date), el('td', '', x.name), el('td', '', x.who), el('td', 'n', som(x.sum)), el('td', 'c hm', x.com)); tb.append(r); });
+  const tf = el('tfoot'), fr = el('tr'); fr.append(el('td', 'hm', ''), el('td', '', 'Jami'), el('td', '', num(LP.length) + ' ta'), el('td', 'n', som(tot)), el('td', 'hm', '')); tf.append(fr);
+  const hd = el('thead'); hd.append(th); t.append(hd, tb, tf);
+  $('lp').replaceChildren(el('h3', '', "Summasi bor yopilgan lidlar"), el('div', 'sub', "Bu lidlarning \"Бюджет !\" summasi yopilgani uchun jami tushumdan chiqib ketgan"), t);
 }
 
 // ptag — profil bo'limida tanlangan guruh ('' = UMUMIY, 'bot' = BotReg, 'target' = Target)
