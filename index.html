@@ -278,9 +278,9 @@ tfoot td { font-weight:750; border-bottom:0; }
     </section>
     <section class="panel">
       <div class="ph"><div class="ib" data-i="users"></div><h2>Menejerlar</h2></div>
-      <p class="pnote">Tanlangan davr bo'yicha. Calltime — gaplashilgan qo'ng'iroqlarning umumiy vaqti.</p>
+      <p class="pnote">Tanlangan davr bo'yicha. Lead obrabotka — menejer kamida 15 soniya gaplashgan har xil lidlar soni. Calltime — gaplashilgan qo'ng'iroqlarning umumiy vaqti.</p>
       <div class="tbl"><table>
-        <thead><tr><th>Menejer</th><th>Yangi lid</th><th>Chiquvchi</th><th>Gaplashgan</th><th>Calltime</th><th>To'liq to'lov</th></tr></thead>
+        <thead><tr><th>Menejer</th><th>Yangi lid</th><th>Chiquvchi</th><th>Lead obrabotka</th><th>Calltime</th><th>To'liq to'lov</th></tr></thead>
         <tbody id="tbody"></tbody><tfoot id="tfoot"></tfoot>
       </table></div>
     </section>
@@ -523,10 +523,10 @@ function drawProfile(d) {
   renderRegions(d.regions);
 
   const rows = d.managers.slice().sort((a, b) => b.sec - a.sec);
-  const cells = (m) => [m.name, num(m.leads), num(m.out), num(m.talked), hms(m.sec), num(m.full)];
+  const cells = (m) => [m.name, num(m.leads), num(m.out), num(m.proc || 0), hms(m.sec), num(m.full)];
   $('tbody').replaceChildren(...rows.map((m) => { const tr = el('tr'); cells(m).forEach((c) => tr.append(el('td', '', c))); return tr; }));
-  const tot = rows.reduce((a, m) => ({ name: 'Jami', leads: a.leads + m.leads, out: a.out + m.out, talked: a.talked + m.talked, sec: a.sec + m.sec, full: a.full + m.full }),
-    { leads: 0, out: 0, talked: 0, sec: 0, full: 0 });
+  const tot = rows.reduce((a, m) => ({ name: 'Jami', leads: a.leads + m.leads, out: a.out + m.out, proc: a.proc + (m.proc || 0), sec: a.sec + m.sec, full: a.full + m.full }),
+    { leads: 0, out: 0, proc: 0, sec: 0, full: 0 });
   const ft = el('tr'); cells(tot).forEach((c) => ft.append(el('td', '', c))); $('tfoot').replaceChildren(ft);
 }
 
